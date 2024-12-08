@@ -1,0 +1,25 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.divider {
+  width: calc(100% + 48px);
+  height: 1px;
+  background-color: var(--grayscale-200);
+  transform: translateX(-24px);
+  margin: 16px 0 24px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    background-color: #333339;
+  }
+
+  .divider {
+    background-color: #585858;
+  }
+}

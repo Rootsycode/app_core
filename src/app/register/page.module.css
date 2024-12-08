@@ -1,0 +1,31 @@
+.form {
+  display: grid;
+  margin-top: 24px;
+  grid-template-columns: 1fr;
+}
+
+.divider {
+  width: calc(100% + 48px);
+  height: 1px;
+  background-color: var(--grayscale-200);
+  transform: translateX(-24px);
+  margin: 16px 0 24px 0;
+}
+
+.dos_inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    background-color: #333339;
+  }
+
+  .divider {
+    background-color: #585858;
+  }
+}

@@ -2,39 +2,43 @@
 // @ts-nocheck
 'use client'
 
-import {
-  Body,
-  ButtonRs,
-  Form,
-  Link,
-  ProgressCircle,
-  TextField,
-  Title
-} from 'rootsy-feparts'
+import { Body, ButtonRs, Form, Link, TextField, Title } from 'rootsy-feparts'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  signInWithPopup
-} from 'firebase/auth'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { doc, setDoc } from 'firebase/firestore'
 import { withGuestAuth } from '@/hoc/withGuestAuth'
-import { LoginLayout } from '@/components/layouts/LoginLayout'
-import { auth } from '../../../firebase.config'
+import { LoginLayout } from '@/components/layouts/LoginLayout/index'
+import { auth, db } from '../../../firebase.config'
 import styles from './page.module.css'
 
-const LoginWithEmail = () => {
+const RegisterWithEmail = () => {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = async e => {
+  const handleRegister = async e => {
     e.preventDefault()
     setIsLoading(true)
     const email = e.target.email.value
     const password = e.target.password.value
+    const name = e.target.name.value
+    const surname = e.target.surname.value
     try {
-      await signInWithEmailAndPassword(auth, email, password)
-      // Redirige al usuario a la página de inicio o a la página de perfil
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+
+      const userDocRef = doc(db, `users/${userCredential.user.uid}`)
+
+      await setDoc(userDocRef, {
+        name,
+        surname,
+        email,
+        createdAt: new Date()
+      })
+
       setIsLoading(false)
     } catch (error) {
       setError(error.message)
@@ -43,12 +47,29 @@ const LoginWithEmail = () => {
   }
 
   return (
-    <Form className={styles.form} onSubmit={handleLogin}>
+    <Form className={styles.form} onSubmit={handleRegister}>
+      <div className={styles.dos_inputs}>
+        <TextField
+          label='Nombre'
+          name='name'
+          errorMessage='Ingresá un nombre válido'
+          pattern='^[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+(?:\s[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+)*$'
+          style={{ maxWidth: '100%', minWidth: 0 }}
+        />
+        <TextField
+          label='Apellido'
+          name='surname'
+          style={{ maxWidth: '100%', minWidth: 0 }}
+          errorMessage='Ingresá un apellido válido'
+          pattern='^[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+(?:\s[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+)*$'
+        />
+      </div>
+
       <TextField
         label='Correo electrónico'
+        placeholder='Ej. noelgallagher@gmail.com'
         name='email'
-        placeholder='usuario@mail.com'
-        errorMessage='Ingresa un correo correcto válido'
+        errorMessage='Por favor ingresa un correo correcto'
         pattern='^[^\s@]+@[^\s@]+\.[^\s@]+$'
         style={{ marginBottom: '12px' }}
       />
@@ -57,7 +78,7 @@ const LoginWithEmail = () => {
         name='password'
         type='password'
         pattern='^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
-        errorMessage='Ingresa una contraseña válida'
+        errorMessage='La contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial.'
         style={{ marginBottom: '16px' }}
       />
 
@@ -83,6 +104,7 @@ const LoginWithGoogle = () => {
     try {
       const provider = new GoogleAuthProvider()
       await signInWithPopup(auth, provider)
+      // Redirige al usuario a la página de inicio o a la página de perfil
       setIsLoading(false)
     } catch (error) {
       setError(error.message)
@@ -94,8 +116,8 @@ const LoginWithGoogle = () => {
     <>
       <ButtonRs
         onClick={handleLogin}
-        isPending={isLoading}
         hierarchy='secondary'
+        isPending={isLoading}
         leftIcon={
           <img
             src='https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg'
@@ -103,7 +125,7 @@ const LoginWithGoogle = () => {
           />
         }
       >
-        Iniciar sesión con Google
+        Registrate con Google
       </ButtonRs>
       {error && (
         <Body size='sm' style={{ marginTop: '16px' }}>
@@ -119,14 +141,13 @@ const Page = () => {
 
   return (
     <LoginLayout>
-      <Title size='xs'>Iniciar sesión</Title>
+      <Title size='xs'>Registrarse</Title>
       <Body size='sm'>
-        ¿No tenés cuenta?{' '}
-        <Link onPress={() => router.push('register')}>Registrarte</Link> es muy
-        fácil.
+        Ya tengo cuenta. Quiero{' '}
+        <Link onPress={() => router.push('login')}>iniciar sesión</Link>.
       </Body>
 
-      {LoginWithEmail()}
+      {RegisterWithEmail()}
 
       <Body size='sm' style={{ textAlign: 'center', marginTop: '12px' }}>
         <Link>No recuerdo mi contraseña</Link>

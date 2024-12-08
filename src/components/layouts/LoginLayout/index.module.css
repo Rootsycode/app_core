@@ -1,0 +1,58 @@
+.container {
+  display: flex;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  background-color: black;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://res.cloudinary.com/dbjqkboeb/image/upload/f_auto,q_auto/szfwp72ptcjb3h3w9yxx');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.3;
+  z-index: 0;
+}
+
+.container > * {
+  position: relative;
+  z-index: 1;
+}
+
+.section {
+  display: flex;
+  width: 317px;
+  flex-direction: column;
+}
+
+.title {
+  color: white;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: white;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  padding: 24px;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
