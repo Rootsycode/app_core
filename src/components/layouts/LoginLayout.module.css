@@ -51,7 +51,7 @@
 .card {
   display: flex;
   flex-direction: column;
-  background-color: white;
+  background-color: var(--background-color);
   padding: 24px;
   box-sizing: border-box;
   border-radius: 8px;

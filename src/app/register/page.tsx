@@ -8,8 +8,8 @@ import { useRouter } from 'next/navigation'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { withGuestAuth } from '@/hoc/withGuestAuth'
-import { LoginLayout } from '@/components/layouts/LoginLayout/index'
-import { auth, db } from '../../../firebase.config'
+import { LoginLayout } from '@/components/layouts/LoginLayout'
+import { auth, db } from '@/lib/firebase.config'
 import styles from './page.module.css'
 
 const RegisterWithEmail = () => {

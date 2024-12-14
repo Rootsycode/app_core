@@ -1,0 +1,153 @@
+.grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  background-image: url('https://res.cloudinary.com/dbjqkboeb/image/upload/f_auto,q_auto/szfwp72ptcjb3h3w9yxx');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.grid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0.5)
+  );
+
+  pointer-events: none; /* Permite interactuar con los elementos debajo */
+}
+
+.header {
+  display: flex;
+  height: 104px;
+  width: 100%;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-400);
+  padding: 0 16px 0 0;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
+.pop_text {
+  display: flex;
+  flex-direction: column;
+}
+
+.home_button {
+  height: 100%;
+  width: 88px;
+  border-radius: 0;
+  background-color: var(--gray-50);
+}
+
+.embla {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+.embla__container {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+  will-change: transform;
+}
+.embla__slide {
+  display: flex;
+  flex: 0 0 100%;
+  width: 100%;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  user-select: none;
+}
+
+.items__grid {
+  display: grid;
+  width: 584px;
+  height: auto;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  row-gap: 40px;
+  column-gap: 56px;
+}
+
+/* Button Section */
+.button_section_container {
+  display: flex;
+  color: var(--gray-200);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.button_section_button {
+  display: grid;
+  place-content: center;
+  height: 72px;
+  width: 104px;
+  border: 0px;
+  border-radius: 8px;
+  color: var(--gray-300);
+  background: linear-gradient(92.28deg, #1b1c23cc 0%, #1b1c23cc 103.32%);
+  cursor: pointer;
+  margin-bottom: 8px;
+  box-shadow: 0 0 0 0 #0000003d;
+  transition: box-shadow 200ms;
+  border: 0;
+  outline-color: transparent;
+  outline-offset: -1px;
+  outline-style: solid;
+  outline-width: 1px;
+
+  &:hover {
+    box-shadow: 0 4px 12px 0 #0000003d;
+    background: linear-gradient(92.28deg, #5e5ea7 0%, #1c9c7d 103.32%);
+  }
+
+  &:focus {
+    outline-color: var(--gray-200);
+  }
+
+  &:active {
+    outline-color: transparent;
+  }
+}
+
+.button_section_disabled {
+  background: #1b1c23cc;
+  filter: invert(33%);
+  box-shadow: none;
+  cursor: default;
+  outline: none;
+
+  &:hover {
+    box-shadow: none;
+    background: #1b1c23cc;
+  }
+}

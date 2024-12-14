@@ -1,0 +1,10 @@
+<svg id="Clientes_icono" data-name="Clientes icono" xmlns="http://www.w3.org/2000/svg" width="34.85" height="30.459" viewBox="0 0 34.85 30.459">
+  <g id="customer" transform="translate(0 -32.65)" opacity="0.798">
+    <circle id="Elipse_35" data-name="Elipse 35" cx="5.5" cy="5.5" r="5.5" transform="translate(12.234 32.65)" fill="#fff"/>
+    <ellipse id="Elipse_36" data-name="Elipse 36" cx="4" cy="3" rx="4" ry="3" transform="translate(25.234 37.65)" fill="#fff"/>
+    <ellipse id="Elipse_37" data-name="Elipse 37" cx="3.5" cy="3" rx="3.5" ry="3" transform="translate(2.234 37.65)" fill="#fff"/>
+    <path id="Trazado_46" data-name="Trazado 46" d="M9.134,241.583c-1.474-1.207-2.808-1.048-4.512-1.048A4.613,4.613,0,0,0,0,245.129v7.434a2,2,0,0,0,2,1.994c4.766,0,4.192.086,4.192-.206C6.194,249.084,5.57,245.221,9.134,241.583Z" transform="translate(0 -193.676)" fill="#fff"/>
+    <path id="Trazado_47" data-name="Trazado 47" d="M131.05,239.93c-2.976-.248-5.563,0-7.794,1.845-3.734,2.991-3.015,7.018-3.015,11.944a2.388,2.388,0,0,0,2.384,2.384c14.368,0,14.939.463,15.791-1.423.279-.638.2-.435.2-6.539C138.618,243.292,134.42,239.93,131.05,239.93Z" transform="translate(-112.004 -193.044)" fill="#fff"/>
+    <path id="Trazado_48" data-name="Trazado 48" d="M382.322,240.536c-1.713,0-3.04-.158-4.512,1.048,3.537,3.611,2.94,7.211,2.94,12.769,0,.294-.477.206,4.121.206a2.071,2.071,0,0,0,2.073-2.065V245.13A4.613,4.613,0,0,0,382.322,240.536Z" transform="translate(-352.094 -193.677)" fill="#fff"/>
+  </g>
+</svg>

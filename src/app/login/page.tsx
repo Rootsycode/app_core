@@ -20,7 +20,7 @@ import {
 } from 'firebase/auth'
 import { withGuestAuth } from '@/hoc/withGuestAuth'
 import { LoginLayout } from '@/components/layouts/LoginLayout'
-import { auth } from '../../../firebase.config'
+import { auth } from '@/lib/firebase.config'
 import styles from './page.module.css'
 
 const LoginWithEmail = () => {
@@ -93,7 +93,7 @@ const LoginWithGoogle = () => {
   return (
     <>
       <ButtonRs
-        onClick={handleLogin}
+        onPress={handleLogin}
         isPending={isLoading}
         hierarchy='secondary'
         leftIcon={

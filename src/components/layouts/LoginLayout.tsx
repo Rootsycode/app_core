@@ -1,7 +1,8 @@
-import { Body, Title } from "rootsy-feparts";
-import styles from './index.module.css'
+import { Body, Title } from 'rootsy-feparts'
+import styles from './LoginLayout.module.css'
+import React from 'react'
 
-export const LoginLayout = ({ children }) => (
+export const LoginLayout = ({ children }: { children: React.ReactNode }) => (
   <div className={styles.container}>
     <section className={styles.section}>
       <Title className={styles.title} size='md'>
@@ -11,9 +12,7 @@ export const LoginLayout = ({ children }) => (
         Sistema de gestión online
       </Body>
 
-      <div className={styles.card}>
-        {children}
-      </div>
+      <div className={styles.card}>{children}</div>
     </section>
   </div>
 )
