@@ -7,7 +7,7 @@ export const LoginLayout = ({ children }: { children: React.ReactNode }) => (
   <div className={styles.container}>
     <section className={styles.section}>
       <div className={styles.logoContainer}>
-        <RootsyLogo width={150} height={40} textColor="#FFFFFF" />
+        <RootsyLogo width={280} height={56} textColor="#FFFFFF" />
       </div>
       <Body className={styles.subtitle} size='xs'>
         Sistema de gestión online

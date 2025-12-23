@@ -39,7 +39,14 @@
 .logoContainer {
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  align-items: center;
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.logoContainer svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .title {
@@ -51,6 +58,7 @@
 .subtitle {
   color: white;
   text-align: center;
+  margin-top: 0;
   margin-bottom: 32px;
 }
 

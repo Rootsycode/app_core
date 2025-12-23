@@ -24,13 +24,14 @@ export const RootsyLogo: React.FC<RootsyLogoProps> = ({
     >
       {/* Texto ROOTSY con tipografía moderna */}
       <text 
-        x="0" 
+        x="70" 
         y="24" 
         fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
         fontSize="24" 
         fontWeight="700" 
         letterSpacing="-0.5"
         fill={textColor}
+        textAnchor="middle"
       >
         ROOTSY
       </text>
