@@ -9,7 +9,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
 import { withGuestAuth } from '@/hoc/withGuestAuth'
 import { LoginLayout } from '@/components/layouts/LoginLayout'
-import { auth, db } from '@/lib/firebase.config'
+import { auth } from '@/lib/firebase.config'
 import styles from './page.module.css'
 
 const RegisterWithEmail = () => {
@@ -29,15 +29,6 @@ const RegisterWithEmail = () => {
         email,
         password
       )
-
-      const userDocRef = doc(db, `users/${userCredential.user.uid}`)
-
-      await setDoc(userDocRef, {
-        name,
-        surname,
-        email,
-        createdAt: new Date()
-      })
 
       setIsLoading(false)
     } catch (error) {

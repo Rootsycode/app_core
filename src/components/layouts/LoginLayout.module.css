@@ -36,6 +36,12 @@
   flex-direction: column;
 }
 
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
 .title {
   color: white;
   text-align: center;

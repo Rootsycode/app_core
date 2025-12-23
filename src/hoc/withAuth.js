@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/AuthContextSupabase'
 
 const withAuth = Component => {
   // eslint-disable-next-line react/display-name
@@ -11,8 +11,8 @@ const withAuth = Component => {
     const router = useRouter()
 
     useEffect(() => {
-      if (!loading && !user) {
-        router.push('/login')
+      if (typeof window !== 'undefined' && !loading && !user) {
+        router.push(`${window.location.origin}/auth/login`)
       }
     }, [user, loading, router])
 

@@ -27,6 +27,11 @@
   border-bottom: 1px solid var(--gray-200);
 }
 
+.logo {
+  height: 32px;
+  width: auto;
+}
+
 .buttons_right {
   display: flex;
   align-items: center;
@@ -78,4 +83,25 @@
 .footer_container {
   display: flex;
   align-items: center;
+}
+
+/* Skeleton styles - mismo color y animación que ButtonPop skeleton */
+.skeleton {
+  background: #2c2e38;
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  animation: skeletonPulse 1.5s infinite;
+}
+
+@keyframes skeletonPulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }

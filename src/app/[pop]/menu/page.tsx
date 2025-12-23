@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import useEmblaCarousel from 'embla-carousel-react'
 import withAuth from '@/hoc/withAuth'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/AuthContextSupabase'
 import {
   Body,
   Button,

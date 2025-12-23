@@ -1,0 +1,7 @@
+<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icono de raíz/árbol estilizado -->
+  <path d="M8 24C8 20 10 16 12 14C10 12 8 8 8 4C8 2 9 1 10 1C11 1 12 2 12 4C12 8 14 12 16 14C18 12 20 8 20 4C20 2 21 1 22 1C23 1 24 2 24 4C24 8 22 12 20 14C22 16 24 20 24 24L24 28C24 29 23 30 22 30C21 30 20 29 20 28L20 24C20 22 19 20 18 19C17 20 15 20 15 22L15 28C15 29 14 30 13 30C12 30 11 29 11 28L11 24C11 20 9 16 7 14C5 12 3 8 3 4C3 2 4 1 5 1C6 1 7 2 7 4C7 8 9 12 11 14C9 16 8 20 8 24Z" fill="#565D98"/>
+  <!-- Texto ROOTSY -->
+  <text x="32" y="22" font-family="Roboto, sans-serif" font-size="20" font-weight="700" fill="#383838">ROOTSY</text>
+</svg>
+

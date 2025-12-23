@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { AuthProvider } from '@/context/AuthContext'
+import { AuthProvider } from '@/context/AuthContextSupabase'
 import './globals.css'
 import 'rootsy-feparts/dist/styles.css'
 

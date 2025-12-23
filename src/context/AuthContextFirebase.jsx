@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe()
   }, [])
 
-  const logOut = () => {
+  const logOut = async () => {
+    await fetch('/api/logout', { method: 'POST' })
     return signOut(auth)
   }
 
