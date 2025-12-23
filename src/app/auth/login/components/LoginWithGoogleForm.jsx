@@ -4,27 +4,36 @@ import { useState } from 'react'
 
 import Image from 'next/image'
 import { Body, ButtonRs } from 'rootsy-feparts'
-
-import { supabase } from '@/lib/supabase'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const LoginWithGoogleForm = ({ router }) => {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+  const supabase = createClientComponentClient()
+
   const handleLogin = async () => {
     setIsLoading(true)
+    setError(null)
+    
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google'
+      // Obtener la URL base (funciona tanto en desarrollo como en producción)
+      const origin = typeof window !== 'undefined' ? window.location.origin : ''
+      
+      const { data, error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${origin}/auth/callback?next=/profile`
+        }
       })
-      if (error) {
-        throw error
+      
+      if (authError) {
+        throw authError
       }
-      if (data) {
-        router.push('/profile')
-      }
-      setIsLoading(false)
+      
+      // signInWithOAuth redirige automáticamente, no necesitamos hacer nada más aquí
+      // El callback route manejará la redirección a /profile
     } catch (error) {
-      setError(error.message)
+      setError(error.message || 'Error al iniciar sesión con Google')
       setIsLoading(false)
     }
   }

@@ -17,14 +17,14 @@ const Page = () => {
       <Title size='xs'>Iniciar sesión</Title>
       <Body size='sm'>
         ¿No tenés cuenta?{' '}
-        <Link onPress={() => router.push('signup')}>Registrarte</Link> es muy
+        <Link onPress={() => router.push('/auth/signup')}>Registrarte</Link> es muy
         fácil.
       </Body>
 
       <LoginWithCredentialsForm router={router} />
 
       <Body size='sm' style={{ textAlign: 'center', marginTop: '12px' }}>
-        <Link>No recuerdo mi contraseña</Link>
+        <Link onPress={() => router.push('/auth/reset-password')}>No recuerdo mi contraseña</Link>
       </Body>
 
       <div className={styles.divider} aria-hidden />
