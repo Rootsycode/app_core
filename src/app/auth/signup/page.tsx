@@ -3,7 +3,7 @@
 'use client'
 
 import { Body, ButtonRs, Form, Link, TextField, Title } from 'rootsy-feparts'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { withGuestAuth } from '@/hoc/withGuestAuth'
@@ -19,7 +19,59 @@ const RegisterWithEmail = ({ router }) => {
     password: ''
   })
   const [isLoading, setIsLoading] = useState(false)
+  const isSubmittingRef = useRef(false)
   const supabase = createClientComponentClient()
+
+  // Validar un campo individual en tiempo real
+  const validateField = (fieldName, value) => {
+    let error = ''
+    
+    if (fieldName === 'name') {
+      if (!value || value.trim() === '') {
+        error = 'El nombre es requerido'
+      } else if (!/^[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+(?:\s[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+)*$/.test(value.trim())) {
+        error = 'El nombre solo puede contener letras y espacios'
+      }
+    } else if (fieldName === 'surname') {
+      if (!value || value.trim() === '') {
+        error = 'El apellido es requerido'
+      } else if (!/^[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+(?:\s[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+)*$/.test(value.trim())) {
+        error = 'El apellido solo puede contener letras y espacios'
+      }
+    } else if (fieldName === 'email') {
+      if (!value || value.trim() === '') {
+        error = 'El correo electrónico es requerido'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+        error = 'Por favor ingresa un correo electrónico válido'
+      }
+    } else if (fieldName === 'password') {
+      if (!value || value === '') {
+        error = 'La contraseña es requerida'
+      } else if (value.length < 8) {
+        error = 'La contraseña debe tener al menos 8 caracteres'
+      } else if (!/(?=.*[A-Z])/.test(value)) {
+        error = 'La contraseña debe contener al menos una mayúscula'
+      } else if (!/(?=.*\d)/.test(value)) {
+        error = 'La contraseña debe contener al menos un número'
+      } else if (!/(?=.*[@$!%*?&])/.test(value)) {
+        error = 'La contraseña debe contener al menos un carácter especial (@$!%*?&)'
+      }
+    }
+    
+    // Solo actualizar el error si el campo tiene un error o si estaba en error y ahora es válido
+    setFieldErrors(prev => {
+      // Si el campo tenía un error y ahora es válido, limpiarlo
+      if (prev[fieldName] && !error) {
+        return { ...prev, [fieldName]: '' }
+      }
+      // Si el campo tiene un error, actualizarlo
+      if (error) {
+        return { ...prev, [fieldName]: error }
+      }
+      // Si no hay error y no había error antes, no hacer nada
+      return prev
+    })
+  }
 
   const validateForm = (name, surname, email, password) => {
     const errors = {
@@ -81,20 +133,48 @@ const RegisterWithEmail = ({ router }) => {
 
   const handleRegister = async e => {
     e.preventDefault()
-    setIsLoading(true)
     setError('')
-    setFieldErrors({ name: '', surname: '', email: '', password: '' })
     
-    const email = e.target.email.value.trim()
-    const password = e.target.password.value
-    const firstName = e.target.name.value.trim()
-    const lastName = e.target.surname.value.trim()
+    // Marcar que estamos en proceso de validación
+    isSubmittingRef.current = true
+    
+    const email = e.target.email?.value?.trim() || ''
+    const password = e.target.password?.value || ''
+    const firstName = e.target.name?.value?.trim() || ''
+    const lastName = e.target.surname?.value?.trim() || ''
 
     // Validar formulario antes de enviar
-    if (!validateForm(firstName, lastName, email, password)) {
-      setIsLoading(false)
+    // validateForm establece los errores en el estado
+    const isValid = validateForm(firstName, lastName, email, password)
+    if (!isValid) {
+      // Los errores ya se establecieron en validateForm
+      // Esperar un momento para que React actualice el estado
+      setTimeout(() => {
+        isSubmittingRef.current = false
+        // Usar los errores recién establecidos
+        setFieldErrors(currentErrors => {
+          const firstErrorField = Object.keys(currentErrors).find(key => currentErrors[key])
+          if (firstErrorField) {
+            setTimeout(() => {
+              const fieldElement = document.querySelector(`[name="${firstErrorField}"]`)
+              if (fieldElement) {
+                fieldElement.focus()
+                fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }
+            }, 50)
+          }
+          return currentErrors
+        })
+      }, 100)
       return
     }
+    
+    // Si la validación pasa, permitir que onInput valide campos
+    isSubmittingRef.current = false
+
+    // Si la validación pasa, limpiar errores y proceder
+    setIsLoading(true)
+    setFieldErrors({ name: '', surname: '', email: '', password: '' })
 
     try {
       // Intentar registrar usuario en Supabase Auth
@@ -221,17 +301,21 @@ const RegisterWithEmail = ({ router }) => {
           label='Nombre'
           name='name'
           errorMessage={fieldErrors.name || 'Ingresá un nombre válido'}
+          isInvalid={!!fieldErrors.name}
           pattern='^[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+(?:\s[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+)*$'
           style={{ maxWidth: '100%', minWidth: 0 }}
           required
+          onInput={(e) => validateField('name', e.target.value)}
         />
         <TextField
           label='Apellido'
           name='surname'
           style={{ maxWidth: '100%', minWidth: 0 }}
           errorMessage={fieldErrors.surname || 'Ingresá un apellido válido'}
+          isInvalid={!!fieldErrors.surname}
           pattern='^[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+(?:\s[a-zA-ZÀ-ÖØ-öø-ÿÁÉÍÓÚáéíóúÑñ]+)*$'
           required
+          onInput={(e) => validateField('surname', e.target.value)}
         />
       </div>
 
@@ -241,22 +325,27 @@ const RegisterWithEmail = ({ router }) => {
         name='email'
         type='email'
         errorMessage={fieldErrors.email || 'Por favor ingresa un correo electrónico válido'}
+        isInvalid={!!fieldErrors.email}
         pattern='^[^\s@]+@[^\s@]+\.[^\s@]+$'
         style={{ marginBottom: '12px' }}
         required
+        onInput={(e) => validateField('email', e.target.value)}
       />
       <TextField
         label='Contraseña'
         name='password'
         type='password'
         errorMessage={fieldErrors.password || 'La contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial (@$!%*?&)'}
+        isInvalid={!!fieldErrors.password}
         pattern='^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
         style={{ marginBottom: '16px' }}
         required
+        onInput={(e) => validateField('password', e.target.value)}
       />
 
+      {/* Mostrar errores del servidor (email duplicado, errores de red, etc.) */}
       {error && (
-        <Body size='sm' style={{ marginBottom: '16px' }}>
+        <Body size='sm' style={{ marginBottom: '16px', color: 'var(--invalid-color, #ef4444)' }}>
           {error}
         </Body>
       )}
