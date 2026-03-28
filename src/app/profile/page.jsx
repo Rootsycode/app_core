@@ -211,9 +211,27 @@ const Page = () => {
                               )}
                               {pop.subscription.status === 'active' && (
                                 <div>
-                                  <strong>{pop.subscription.planDisplayName || pop.subscription.planName}</strong>
+                                  <Body size="md" color="white">
+                                    <strong>{pop.subscription.planDisplayName || pop.subscription.planName}</strong>
+                                  </Body>
                                   <br />
-                                  {pop.subscription.businessTypeDisplayName || pop.subscription.businessTypeName}
+                                  <Body size="md" color="white">
+                                    {pop.subscription.businessTypeDisplayName || pop.subscription.businessTypeName}
+                                  </Body>
+                                </div>
+                              )}
+                              {pop.isOwner && pop.subscription.isActive === false && (
+                                <div style={{ marginTop: '10px' }}>
+                                  <ButtonRs
+                                    size='sm'
+                                    hierarchy='secondary'
+                                    inverted
+                                    onPress={() =>
+                                      router.push(`/pops/${pop.id}/subscribe`)
+                                    }
+                                  >
+                                    Activar suscripción
+                                  </ButtonRs>
                                 </div>
                               )}
                             </div>

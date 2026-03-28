@@ -36,14 +36,15 @@ interface ButtonSection {
 const ButtonSection = ({ icon, label, action, disabled }: ButtonSection) => (
   <div className={styles.button_section_container}>
     <Button
-      onPress={action && action}
-      className={`${styles.button_section_button} ${
-        disabled && styles.button_section_disabled
-      }`}
+      onPress={action || undefined}
+      className={`${styles.button_section_button} ${disabled && styles.button_section_disabled
+        }`}
     >
       {icon}
     </Button>
-    <Utility size='md'>{label}</Utility>
+    <Utility size='md' color='white'>
+      {label}
+    </Utility>
   </div>
 )
 
@@ -65,11 +66,7 @@ const Page = () => {
 
   // Cargar datos del POP y permisos
   useEffect(() => {
-    console.log('Menu page - params:', params)
-    console.log('Menu page - popId:', popId)
-    
     if (!popId) {
-      console.log('Menu page - No popId found, setting error')
       setLoading(false)
       setError('ID de POP no encontrado')
       return
@@ -77,14 +74,11 @@ const Page = () => {
 
     const loadPopData = async () => {
       try {
-        console.log('Menu page - Loading POP data for:', popId)
         setLoading(true)
         setError(null)
         const result = await getPopMenuData(popId)
-        console.log('Menu page - Result:', result)
 
         if (!result.success) {
-          console.error('Menu page - Error loading data:', result.error)
           setError(result.error || 'Error al cargar datos')
           if (result.redirect) {
             setTimeout(() => {
@@ -95,7 +89,6 @@ const Page = () => {
           return
         }
 
-        console.log('Menu page - Setting pop data and permissions')
         // Usar un batch update para evitar múltiples re-renders
         setPopData(result.pop!)
         setPermissions(result.permissions || {})
@@ -104,8 +97,10 @@ const Page = () => {
           setLoading(false)
         }, 0)
       } catch (err: any) {
-        console.error('Menu page - Error loading POP data:', err)
-        setError('Error inesperado al cargar datos: ' + (err.message || 'Error desconocido'))
+        setError(
+          'Error inesperado al cargar datos: ' +
+          (err.message || 'Error desconocido')
+        )
         setLoading(false)
       }
     }
@@ -116,7 +111,6 @@ const Page = () => {
   // Re-inicializar Embla solo cuando los datos estén listos
   useEffect(() => {
     if (emblaApi && !loading && popData) {
-      console.log('Menu page - Reinitializing Embla')
       emblaApi.reInit()
     }
   }, [emblaApi, loading, popData])
@@ -134,8 +128,7 @@ const Page = () => {
   // Memoizar los items del menú procesados para evitar recalcular en cada render
   const processedMenuItems = useMemo(() => {
     if (!popData || Object.keys(permissions).length === 0) return []
-    
-    console.log('Menu page - Processing menu items')
+
     return MENU.map((groups, groupIndex) => ({
       groupIndex,
       items: groups.map((item, itemIndex) => {
@@ -193,32 +186,67 @@ const Page = () => {
       <div className={styles.grid}>
         <header className={styles.header}>
           <div className={styles.left}>
-            <ButtonIcon 
-              className={styles.home_button} 
-              icon={<HomeIcon24 />} 
+            <ButtonIcon
+              className={styles.home_button}
+              icon={<HomeIcon24 />}
               onPress={handleHomeClick}
             />
             <Separe width={24} />
-            <ButtonThumb 
-              src={popData.imageUrl || 'https://files.lafm.com.co/assets/public/styles/img_node_706x392/public/2018-06/mia_6_0.jpg.webp?VersionId=5JmTFkYwubURMj1EkAsGiS8U26gBGb7z&itok=BoONFqiq'} 
+            <ButtonThumb
+              src={
+                popData.imageUrl ||
+                'https://files.lafm.com.co/assets/public/styles/img_node_706x392/public/2018-06/mia_6_0.jpg.webp?VersionId=5JmTFkYwubURMj1EkAsGiS8U26gBGb7z&itok=BoONFqiq'
+              }
             />
 
             <Separe width={12} />
             <div className={styles.pop_text}>
-              <Title size='xs'>{popData.name}</Title>
-              <Body size='md'>{popData.address || 'Sin dirección'}</Body>
+              <Title size='xs' color='white'>
+                {popData.name}
+              </Title>
+              <Body size='md' color='white'>
+                {popData.address || 'Sin dirección'}
+              </Body>
             </div>
           </div>
 
           <div className={styles.center}>
-            <SearchField placeholder='Buscar sección' />
+            <SearchField
+              placeholder='Buscar sección'
+              icon={
+                <svg
+                  fill='#000000'
+                  width='800px'
+                  height='800px'
+                  viewBox='0 -0.24 28.423 28.423'
+                  id='_02_-_Search_Button'
+                  data-name='02 - Search Button'
+                  xmlns='http://www.w3.org/2000/svg'
+                >
+                  <path
+                    id='Path_215'
+                    data-name='Path 215'
+                    d='M14.953,2.547A12.643,12.643,0,1,0,27.6,15.19,12.649,12.649,0,0,0,14.953,2.547Zm0,2A10.643,10.643,0,1,1,4.31,15.19,10.648,10.648,0,0,1,14.953,4.547Z'
+                    transform='translate(-2.31 -2.547)'
+                    fill-rule='evenodd'
+                  />
+                  <path
+                    id='Path_216'
+                    data-name='Path 216'
+                    d='M30.441,28.789l-6.276-6.276a1,1,0,1,0-1.414,1.414L29.027,30.2a1,1,0,1,0,1.414-1.414Z'
+                    transform='translate(-2.31 -2.547)'
+                    fill-rule='evenodd'
+                  />
+                </svg>
+              }
+            />
           </div>
 
           <div className={styles.right}>
-            <ButtonIcon icon={<AlertIcon24 />} />
+            <ButtonIcon icon={<AlertIcon24 />} inverted />
             <Separe width={8} />
 
-            <MenuButton iconButton>
+            <MenuButton iconButton inverted>
               <MenuItem onAction={() => router.push('/profile')}>
                 <ProfileIcon16 />
                 Ver perfil
@@ -234,7 +262,12 @@ const Page = () => {
             </MenuButton>
             <Separe width={12} />
 
-            <ButtonThumb src={user?.user_metadata?.avatar_url || 'https://files.lafm.com.co/assets/public/styles/img_node_706x392/public/2018-06/mia_6_0.jpg.webp?VersionId=5JmTFkYwubURMj1EkAsGiS8U26gBGb7z&itok=BoONFqiq'} />
+            <ButtonThumb
+              src={
+                user?.user_metadata?.avatar_url ||
+                'https://files.lafm.com.co/assets/public/styles/img_node_706x392/public/2018-06/mia_6_0.jpg.webp?VersionId=5JmTFkYwubURMj1EkAsGiS8U26gBGb7z&itok=BoONFqiq'
+              }
+            />
           </div>
         </header>
 
@@ -242,10 +275,10 @@ const Page = () => {
           <section className={styles.section_main}>
             <div className={styles.embla} ref={emblaRef}>
               <div className={styles.embla__container}>
-                {processedMenuItems.map((group) => (
+                {processedMenuItems.map(group => (
                   <div className={styles.embla__slide} key={group.groupIndex}>
                     <div className={styles.items__grid}>
-                      {group.items.map((item) => (
+                      {group.items.map(item => (
                         <div
                           className={styles.embla_inner_slide}
                           key={`carousel-${group.groupIndex}-${item.itemIndex}`}
@@ -253,7 +286,14 @@ const Page = () => {
                           <ButtonSection
                             disabled={item.isDisabled}
                             label={item.label}
-                            icon={<img src={item.img} aria-hidden alt={item.label} loading="lazy" />}
+                            icon={
+                              <img
+                                src={item.img}
+                                aria-hidden
+                                alt={item.label}
+                                loading='lazy'
+                              />
+                            }
                             action={
                               !item.isDisabled && item.link
                                 ? () => handleMenuItemClick(item.link)

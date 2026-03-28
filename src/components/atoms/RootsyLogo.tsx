@@ -5,33 +5,38 @@ interface RootsyLogoProps {
   height?: number
   className?: string
   textColor?: string
+  /** Por defecto el texto va centrado en el viewBox; `left` alinea a la izquierda. */
+  align?: 'center' | 'left'
 }
 
-export const RootsyLogo: React.FC<RootsyLogoProps> = ({ 
-  width = 140, 
+export const RootsyLogo: React.FC<RootsyLogoProps> = ({
+  width = 140,
   height = 32,
   className,
-  textColor = '#FFFFFF'
+  textColor = '#FFFFFF',
+  align = 'center'
 }) => {
+  const textAnchor = align === 'left' ? 'start' : 'middle'
+  const x = align === 'left' ? 2 : 70
+
   return (
-    <svg 
-      width={width} 
-      height={height} 
-      viewBox="0 0 140 32" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
+    <svg
+      width={width}
+      height={height}
+      viewBox='0 0 140 32'
+      fill='none'
+      xmlns='http://www.w3.org/2000/svg'
       className={className}
     >
-      {/* Texto ROOTSY con tipografía moderna */}
-      <text 
-        x="70" 
-        y="24" 
-        fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
-        fontSize="24" 
-        fontWeight="700" 
-        letterSpacing="-0.5"
+      <text
+        x={x}
+        y='24'
+        fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+        fontSize='24'
+        fontWeight='700'
+        letterSpacing='-0.5'
         fill={textColor}
-        textAnchor="middle"
+        textAnchor={textAnchor}
       >
         ROOTSY
       </text>

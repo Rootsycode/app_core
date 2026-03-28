@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Body, ButtonRs, Form, TextField, Title, Link, RadioGroup, Radio } from 'rootsy-feparts'
 import { createPop } from '@/lib/popHelpers'
-import { LoginLayout } from '@/components/layouts/LoginLayout'
+import { RootsyLogo } from '@/components/atoms/RootsyLogo'
 import styles from './page.module.css'
+
+const BUSINESS_TYPES_SKELETON_COUNT = 5
 
 const CreatePopPage = () => {
   const router = useRouter()
@@ -39,7 +41,6 @@ const CreatePopPage = () => {
     loadBusinessTypes()
   }, [])
 
-  // Validar un campo individual en tiempo real
   const validateField = (fieldName, value) => {
     let error = ''
 
@@ -51,33 +52,26 @@ const CreatePopPage = () => {
       } else if (value.trim().length > 100) {
         error = 'El nombre no puede tener más de 100 caracteres'
       }
-    } else if (fieldName === 'businessType') {
-      // El tipo de negocio es opcional, no necesita validación
     }
 
-    // Solo actualizar el error si el campo tiene un error o si estaba en error y ahora es válido
     setFieldErrors((prev) => {
-      // Si el campo tenía un error y ahora es válido, limpiarlo
       if (prev[fieldName] && !error) {
         return { ...prev, [fieldName]: '' }
       }
-      // Si el campo tiene un error, actualizarlo
       if (error) {
         return { ...prev, [fieldName]: error }
       }
-      // Si no hay error y no había error antes, no hacer nada
       return prev
     })
   }
 
-  const validateForm = (name, businessType) => {
+  const validateForm = (name) => {
     const errors = {
       popName: '',
       businessType: ''
     }
     let isValid = true
 
-    // Validar nombre
     if (!name || name.trim() === '') {
       errors.popName = 'El nombre del punto de venta es requerido'
       isValid = false
@@ -103,8 +97,7 @@ const CreatePopPage = () => {
     const name = popName.trim()
     const businessType = selectedBusinessType
 
-    // Validar formulario antes de enviar
-    const isValid = validateForm(name, businessType)
+    const isValid = validateForm(name)
     if (!isValid) {
       setTimeout(() => {
         isSubmittingRef.current = false
@@ -138,7 +131,6 @@ const CreatePopPage = () => {
 
       if (result.success) {
         setSuccess(true)
-        // Redirigir al profile después de 2 segundos
         setTimeout(() => {
           router.push('/profile')
         }, 2000)
@@ -154,99 +146,186 @@ const CreatePopPage = () => {
   }
 
   return (
-    <LoginLayout>
-      <Title size='xs'>Crear nuevo punto de venta</Title>
-      <Body size='sm' style={{ marginTop: '8px', marginBottom: '24px' }}>
-        Crea tu primer punto de venta y comienza a gestionar tu negocio. Tendrás 7 días de prueba gratis.
-      </Body>
-
-      {success ? (
-        <div style={{ textAlign: 'center', padding: '24px' }}>
-          <Body size='sm' style={{ color: 'var(--success-500, #1EAE89)', marginBottom: '16px' }}>
-            ✅ ¡Punto de venta creado exitosamente!
-          </Body>
-          <Body size='sm'>Redirigiendo a tu perfil...</Body>
-        </div>
-      ) : (
-        <Form className={styles.form} onSubmit={handleCreatePop}>
-          <TextField
-            label='Nombre del punto de venta'
-            name='popName'
-            placeholder='Ej: Mi Tienda, Restaurante El Buen Sabor'
-            errorMessage={fieldErrors.popName || 'Ingresa un nombre para tu punto de venta'}
-            isInvalid={!!fieldErrors.popName}
-            required
-            style={{ marginBottom: '24px' }}
-            autoFocus
-            onInput={(e) => {
-              const value = e.target.value
-              setPopName(value)
-              if (!isSubmittingRef.current) {
-                validateField('popName', value)
-              }
-            }}
-          />
-
-          {loadingTypes ? (
-            <div style={{ marginBottom: '24px' }}>
-              <Body size='sm' style={{ color: '#666' }}>Cargando tipos de negocio...</Body>
-            </div>
-          ) : businessTypes.length > 0 ? (
-            <div style={{ marginBottom: '24px' }}>
-              <RadioGroup
-                label='Tipo de negocio (opcional)'
-                value={selectedBusinessType}
-                onChange={(value) => setSelectedBusinessType(value)}
-                description='El tipo de negocio determina las funcionalidades disponibles. Puedes cambiarlo más tarde.'
-              >
-                {businessTypes.map((type) => (
-                  <Radio key={type.id} value={type.id}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <span style={{ fontWeight: '500' }}>{type.display_name}</span>
-                      {type.addon_price_monthly > 0 && (
-                        <span style={{ fontSize: '12px', color: '#666' }}>
-                          +${type.addon_price_monthly}/mes
-                        </span>
-                      )}
-                      {type.description && (
-                        <span style={{ fontSize: '12px', color: '#666' }}>
-                          {type.description}
-                        </span>
-                      )}
-                    </div>
-                  </Radio>
-                ))}
-              </RadioGroup>
-            </div>
-          ) : null}
-
-          {error && (
-            <Body
-              size='sm'
-              style={{
-                marginBottom: '16px',
-                color: 'var(--invalid-color, #ef4444)',
-                padding: '12px',
-                background: '#fee',
-                borderRadius: '4px'
-              }}
-            >
-              {error}
+    <div className={styles.page}>
+      <div className={styles.shell}>
+        <aside className={styles.hero} aria-label='Rootsy'>
+          <div className={styles.heroContent}>
+            <RootsyLogo
+              className={styles.heroLogo}
+              width={280}
+              height={56}
+              textColor='#ffffff'
+              align='left'
+            />
+            <span className={styles.heroEyebrow}>Nuevo punto de venta</span>
+            <Title component='h2' size='sm' color='white' className={styles.heroTitle}>
+              Un solo lugar para vender, controlar stock y crecer.
+            </Title>
+            <Body size='sm' color='white' className={styles.heroLead}>
+              Configurá tu espacio en minutos. Probá todas las funciones{' '}
+              <strong>7 días gratis</strong>, sin tarjeta.
             </Body>
-          )}
+            <ul className={styles.heroBullets}>
+              <li>
+                <span className={styles.bulletIcon} aria-hidden />
+                Operación centralizada y reportes claros
+              </li>
+              <li>
+                <span className={styles.bulletIcon} aria-hidden />
+                Elegí el tipo de negocio que mejor encaje
+              </li>
+              <li>
+                <span className={styles.bulletIcon} aria-hidden />
+                Cambiá de plan cuando lo necesites
+              </li>
+            </ul>
+            <p className={styles.heroTagline}>Sistema de gestión online</p>
+          </div>
+        </aside>
 
-          <ButtonRs type='submit' isPending={loading} style={{ width: '100%' }}>
-            Crear punto de venta
-          </ButtonRs>
-        </Form>
-      )}
+        <main className={styles.main}>
+          <div className={styles.panel}>
+            <nav className={styles.panelNav} aria-label='Navegación'>
+              <Link
+                className={styles.backLink}
+                onPress={() => router.push('/profile')}
+              >
+                ← Volver al perfil
+              </Link>
+            </nav>
 
-      <Body size='sm' style={{ textAlign: 'center', marginTop: '24px' }}>
-        <Link onPress={() => router.push('/profile')}>Volver al perfil</Link>
-      </Body>
-    </LoginLayout>
+            <header className={styles.panelHeader}>
+              <span className={styles.trialPill}>7 días de prueba</span>
+              <Title component='h1' size='xs' className={styles.panelTitle}>
+                Crear punto de venta
+              </Title>
+              <Body size='sm' className={styles.lead}>
+                Nombre público de tu local o sucursal. Más adelante podés sumar
+                suscripción y addons.
+              </Body>
+            </header>
+
+            {success ? (
+              <div className={styles.successState} role='status' aria-live='polite'>
+                <div className={styles.successIcon} aria-hidden />
+                <Title
+                  component='h2'
+                  size='xs'
+                  className={styles.successTitle}
+                  color='success'
+                >
+                  ¡Punto de venta creado!
+                </Title>
+                <Body size='sm' className={styles.successSub}>
+                  Redirigiendo a tu perfil…
+                </Body>
+              </div>
+            ) : (
+              <Form className={styles.form} onSubmit={handleCreatePop}>
+                <div className={styles.fieldBlock}>
+                  <TextField
+                    label='Nombre del punto de venta'
+                    name='popName'
+                    placeholder='Ej: Mi Tienda, Restaurante El Buen Sabor'
+                    errorMessage={
+                      fieldErrors.popName ||
+                      'Ingresa un nombre para tu punto de venta'
+                    }
+                    isInvalid={!!fieldErrors.popName}
+                    required
+                    autoFocus
+                    onInput={(e) => {
+                      const value = e.target.value
+                      setPopName(value)
+                      if (!isSubmittingRef.current) {
+                        validateField('popName', value)
+                      }
+                    }}
+                  />
+                </div>
+
+                {loadingTypes ? (
+                  <div
+                    className={styles.subscriptionBlock}
+                    aria-busy='true'
+                    aria-label='Cargando tipos de negocio'
+                  >
+                    <div
+                      className={`${styles.serviceTypePickerShell} ${styles.serviceTypePickerStatic}`}
+                    >
+                      <div className={styles.serviceTypeLabel}>
+                        Tipo de negocio (opcional)
+                      </div>
+                      <div className={styles.skeletonCards}>
+                        {Array.from({ length: BUSINESS_TYPES_SKELETON_COUNT }, (_, key) => (
+                          <div key={key} className={styles.skeletonCard}>
+                            <div className={styles.skeletonRadioDot} />
+                            <div className={styles.skeletonCardInner}>
+                              <div className={styles.skeletonCardTitle} />
+                              <div className={styles.skeletonCardLine} />
+                              <div className={styles.skeletonCardLineShort} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className={styles.serviceTypeDescription}>
+                        El tipo de negocio determina las funcionalidades disponibles.
+                        Podés cambiarlo más adelante.
+                      </p>
+                    </div>
+                  </div>
+                ) : businessTypes.length > 0 ? (
+                  <div className={styles.subscriptionBlock}>
+                    <RadioGroup
+                      className={`${styles.businessRadioGroup} ${styles.serviceTypePickerShell}`}
+                      label='Tipo de negocio (opcional)'
+                      value={selectedBusinessType}
+                      onChange={(value) => setSelectedBusinessType(value)}
+                      description='El tipo de negocio determina las funcionalidades disponibles. Podés cambiarlo más adelante.'
+                    >
+                      {businessTypes.map((type) => (
+                        <Radio key={type.id} value={type.id}>
+                          <div className={styles.radioCard}>
+                            <div className={styles.radioCardTitle}>
+                              {type.display_name}
+                            </div>
+                            {type.addon_price_monthly > 0 && (
+                              <div className={styles.radioCardPrice}>
+                                +${type.addon_price_monthly}/mes
+                              </div>
+                            )}
+                            {type.description && (
+                              <div className={styles.radioCardDesc}>
+                                {type.description}
+                              </div>
+                            )}
+                          </div>
+                        </Radio>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                ) : null}
+
+                {error && (
+                  <div className={styles.errorBanner} role='alert'>
+                    {error}
+                  </div>
+                )}
+
+                <ButtonRs
+                  type='submit'
+                  isPending={loading}
+                  className={styles.submitButton}
+                >
+                  Crear punto de venta
+                </ButtonRs>
+              </Form>
+            )}
+          </div>
+        </main>
+      </div>
+    </div>
   )
 }
 
 export default CreatePopPage
-

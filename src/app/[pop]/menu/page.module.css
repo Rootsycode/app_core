@@ -28,15 +28,14 @@
 }
 
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
   height: 104px;
   width: 100%;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.05);
+  background: #1b1c2366;
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--greyscale-400);
-  padding: 0 16px 0 0;
+  border-bottom: 1px solid var(--greyscale-600);
 }
 
 .main {
@@ -53,6 +52,22 @@
   display: flex;
   height: 100%;
   align-items: center;
+  min-width: 0;
+}
+
+.center {
+  justify-content: center;
+}
+
+.center :global(.react-aria-Input) {
+  background: var(--greyscale-700);
+  border-color: var(--greyscale-500);
+  color: var(--greyscale-0);
+}
+
+.right {
+  justify-content: flex-end;
+  padding-right: 16px;
 }
 
 .pop_text {
@@ -64,7 +79,16 @@
   height: 100%;
   width: 88px;
   border-radius: 0;
-  background-color: var(--greyscale-0);
+  background-color: var(--greyscale-700);
+  color: var(--greyscale-0);
+
+  &:hover {
+    background-color: var(--greyscale-600);
+  }
+
+  &:active {
+    background-color: var(--greyscale-600);
+  }
 }
 
 .embla {
@@ -114,7 +138,7 @@
   border: 0px;
   border-radius: 8px;
   color: var(--greyscale-300);
-  background: linear-gradient(92.28deg, #1b1c23cc 0%, #1b1c23cc 103.32%);
+  background: linear-gradient(92.28deg, #1b1c23cc 0%, #1b1c23cc 103.32%) !important;
   cursor: pointer;
   margin-bottom: 8px;
   box-shadow: 0 0 0 0 #0000003d;
@@ -127,7 +151,7 @@
 
   &:hover {
     box-shadow: 0 4px 12px 0 #0000003d;
-    background: linear-gradient(92.28deg, #5e5ea7 0%, #1c9c7d 103.32%);
+    background: linear-gradient(92.28deg, #5e5ea7 0%, #1c9c7d 103.32%) !important;
   }
 
   &:focus {
@@ -150,4 +174,8 @@
     box-shadow: none;
     background: #1b1c23cc;
   }
+}
+
+.menuSearchField {
+  background: var(--greyscale-700);
 }
