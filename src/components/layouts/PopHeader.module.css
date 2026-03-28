@@ -1,0 +1,32 @@
+.header {
+  display: flex;
+  height: 104px;
+  width: 100%;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--greyscale-400);
+  padding: 0 16px 0 0;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
+.pop_text {
+  display: flex;
+  flex-direction: column;
+}
+
+.home_button {
+  height: 100%;
+  width: 88px;
+  border-radius: 0;
+  background-color: var(--greyscale-0);
+}
+
