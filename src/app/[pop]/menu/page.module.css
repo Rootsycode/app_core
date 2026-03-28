@@ -35,7 +35,7 @@
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--gray-400);
+  border-bottom: 1px solid var(--greyscale-400);
   padding: 0 16px 0 0;
 }
 
@@ -64,7 +64,7 @@
   height: 100%;
   width: 88px;
   border-radius: 0;
-  background-color: var(--gray-50);
+  background-color: var(--greyscale-0);
 }
 
 .embla {
@@ -100,7 +100,7 @@
 /* Button Section */
 .button_section_container {
   display: flex;
-  color: var(--gray-200);
+  color: var(--greyscale-200);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -113,7 +113,7 @@
   width: 104px;
   border: 0px;
   border-radius: 8px;
-  color: var(--gray-300);
+  color: var(--greyscale-300);
   background: linear-gradient(92.28deg, #1b1c23cc 0%, #1b1c23cc 103.32%);
   cursor: pointer;
   margin-bottom: 8px;
@@ -131,7 +131,7 @@
   }
 
   &:focus {
-    outline-color: var(--gray-200);
+    outline-color: var(--greyscale-200);
   }
 
   &:active {

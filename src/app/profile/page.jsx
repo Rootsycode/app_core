@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Body,
   ButtonPop,
@@ -33,7 +34,7 @@ const Header = () => {
       <RootsyLogo className={styles.logo} />
 
       <div className={styles.buttons_right}>
-        <MenuButton iconButton>
+        <MenuButton iconButton inverted>
           <MenuItem>
             <ProfileIcon16 />
             Ver perfil
@@ -54,23 +55,36 @@ const Header = () => {
 }
 
 const Page = () => {
+  const router = useRouter()
   const [pops, setPops] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
   const { loading } = useAuth()
+
+  const handleCreatePop = () => {
+    router.push('/pops/create')
+  }
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoadingProfile(true)
         const [popsData, profileData] = await Promise.all([
-          getUserPops(),
-          getUserProfile()
+          getUserPops().catch((err) => {
+            console.error('Error fetching pops:', err)
+            return []
+          }),
+          getUserProfile().catch((err) => {
+            console.error('Error fetching profile:', err)
+            return null
+          })
         ])
-        setPops(popsData)
+        setPops(popsData || [])
         setUserProfile(profileData)
       } catch (err) {
         console.error('Error al cargar los datos:', err)
+        setPops([])
+        setUserProfile(null)
       } finally {
         setIsLoadingProfile(false)
       }
@@ -160,16 +174,51 @@ const Page = () => {
     <div className={styles.container}>
       <Header />
       <main className={styles.main}>
-        <Title>¡Bienvenido {userName}! 👋</Title>
+        <Title color="white">¡Bienvenido {userName}! 👋</Title>
         <Separe height={80} />
-        <Body size='lg'>¿A qué punto de venta querés ingresar?</Body>
+        <Body size="lg" color="white">
+          ¿A qué punto de venta querés ingresar?
+        </Body>
         <Separe height={40} />
         <div className={styles.pops}>
           <ul>
             {pops ? (
               pops.map((pop) => (
                 <li key={pop.id}>
-                  <ButtonPop name={pop.name} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <ButtonPop 
+                      name={pop.name}
+                      onClick={() => router.push(`/${pop.id}/menu`)}
+                    />
+                          {pop.subscription && (
+                            <div
+                              style={{
+                                marginTop: '8px',
+                                textAlign: 'center',
+                                maxWidth: '200px'
+                              }}
+                            >
+                              {pop.subscription.status === 'trial' && (
+                                <div>
+                                  <Body size="xs" color="white" style={{ fontWeight: '500' }}>
+                                    Prueba gratis
+                                  </Body>
+                                  <br />
+                                  <Body size="xs" color="white">
+                                    {pop.subscription.daysRemaining || pop.subscription.days_remaining || 0} días restantes
+                                  </Body>
+                                </div>
+                              )}
+                              {pop.subscription.status === 'active' && (
+                                <div>
+                                  <strong>{pop.subscription.planDisplayName || pop.subscription.planName}</strong>
+                                  <br />
+                                  {pop.subscription.businessTypeDisplayName || pop.subscription.businessTypeName}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                  </div>
                 </li>
               ))
             ) : (
@@ -178,14 +227,17 @@ const Page = () => {
               </li>
             )}
             <li>
-              <ButtonPop aria-label="Abrir nuevo punto de venta" />
+              <ButtonPop 
+                aria-label="Abrir nuevo punto de venta" 
+                onClick={handleCreatePop}
+              />
             </li>
           </ul>
         </div>
       </main>
       <footer className={styles.footer}>
         <div className={styles.footer_container}>
-          <Body size='sm'>
+          <Body size="sm" color="white">
             ¡Instalá el sistema en tu compu y accedé más fácil y rápido!
           </Body>
           <Separe width={20} />
@@ -193,6 +245,7 @@ const Page = () => {
             leftIcon={<DownloadCloudIcon12 />}
             size='sm'
             hierarchy='secondary'
+            inverted
           >
             Descargar
           </ButtonRs>

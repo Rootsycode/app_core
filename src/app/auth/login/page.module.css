@@ -13,13 +13,3 @@
   transform: translateX(-24px);
   margin: 16px 0 24px 0;
 }
-
-@media (prefers-color-scheme: dark) {
-  .card {
-    background-color: #333339;
-  }
-
-  .divider {
-    background-color: #585858;
-  }
-}

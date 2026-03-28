@@ -154,7 +154,8 @@ export const MENU = [
     },
     {
       label: 'Ajustes',
-      img: '/assets/menu/ajustes.svg'
+      img: '/assets/menu/ajustes.svg',
+      link: 'ajustes'
     }
   ]
 ]

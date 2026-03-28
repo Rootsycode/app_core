@@ -48,13 +48,3 @@
   box-sizing: border-box;
   min-width: 0;
 }
-
-@media (prefers-color-scheme: dark) {
-  .card {
-    background-color: #333339;
-  }
-
-  .divider {
-    background-color: #585858;
-  }
-}
