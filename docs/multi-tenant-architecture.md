@@ -42,13 +42,14 @@ CREATE TABLE public.user_pop_roles (
   UNIQUE(user_id, pop_id) -- Un usuario solo puede tener un rol por POP
 );
 
--- Tabla de Roles
+-- Tabla de Roles (ver también docs/supabase-access-security.md y docs/supabase/alter_roles_add_pop_id.sql)
 CREATE TABLE public.roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT UNIQUE NOT NULL, -- 'owner', 'admin', 'manager', 'cashier', 'viewer'
+  pop_id UUID REFERENCES public.pops(id) ON DELETE CASCADE, -- NULL = rol sistema/plantilla; NOT NULL = rol custom del POP
+  name TEXT NOT NULL, -- UNIQUE recomendado por (pop_id, name) en migración real, no global si hay homónimos por POP
   display_name TEXT NOT NULL,
   description TEXT,
-  is_system BOOLEAN DEFAULT false, -- Roles del sistema vs custom
+  is_system BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
