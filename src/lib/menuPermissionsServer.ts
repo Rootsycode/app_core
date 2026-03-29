@@ -1,7 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { requireAuthenticatedUser } from './authHelpers'
 import {
   getMenuResourceAction,
@@ -31,8 +30,7 @@ export async function checkMenuPermission (
     }
 
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('user_has_permission', {
       pop_id: popId,

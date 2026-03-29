@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { requireAuthenticatedUser } from '@/lib/authHelpers'
 
-export async function GET() {
+export async function GET () {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('can_user_create_pop', {
       user_id: user.uid
@@ -49,4 +47,3 @@ export async function GET() {
     )
   }
 }
-

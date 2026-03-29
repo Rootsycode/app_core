@@ -5,10 +5,11 @@ import { useParams, useRouter } from 'next/navigation'
 import withAuth from '@/hoc/withAuth'
 import { useAuth } from '@/context/AuthContextSupabase'
 import { PopScreenLayout } from '@/components/layouts/PopScreenLayout'
-import { HeaderSections } from '@/components/HeaderSections'
-import { CloseSessionIcon16 } from '@/components/atoms/icons/CloseSessionIcon16'
-import { HelpIcon16 } from '@/components/atoms/icons/HelpIcon16'
-import { ProfileIcon16 } from '@/components/atoms/icons/ProfileIcon16'
+import {
+  HeaderSections,
+  POP_SCREEN_DEFAULT_AVATAR,
+  createPopHeaderMenuOptions
+} from '@/components/HeaderSections'
 import { SaleProvider, useSaleContext } from './context/SaleContext'
 import { SaleLayout } from './components/SaleLayout'
 import { SaleSummary } from './components/SaleSummary'
@@ -112,28 +113,10 @@ function PageContent () {
 
   const toggleOpenPanel = () => setOpenPanel((o) => !o)
 
-  const menuOptions = [
-    {
-      icon: <ProfileIcon16 />,
-      name: 'Ver perfil',
-      href: '/profile'
-    },
-    {
-      icon: <HelpIcon16 />,
-      name: 'Ayuda',
-      href: '/home'
-    },
-    {
-      icon: <CloseSessionIcon16 />,
-      name: 'Cerrar sesión',
-      onAction: async () => {
-        await logOut()
-        router.push('/auth/login')
-      }
-    }
-  ]
+  const menuOptions = createPopHeaderMenuOptions(router, logOut)
 
-  const userAvatarSrc = user?.user_metadata?.avatar_url || ''
+  const userAvatarSrc =
+    user?.user_metadata?.avatar_url || POP_SCREEN_DEFAULT_AVATAR
 
   if (!popId) {
     return (

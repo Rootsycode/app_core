@@ -7,11 +7,13 @@ import { useAuth } from '@/context/AuthContextSupabase'
 import { usePopPermissions } from '@/context/PopPermissionsContext'
 import { POP_PERMS } from '@/lib/popPermissionConstants'
 import { Body, ButtonRs, Title } from 'rootsy-feparts'
+import { PopScreenLayout } from '@/components/layouts/PopScreenLayout'
+import popShellStyles from '@/components/layouts/PopScreenLayout.module.css'
 import {
-  PopDarkShellLayout,
-  POP_SCREEN_DEFAULT_AVATAR
-} from '@/components/layouts/PopDarkShellLayout'
-import popShellStyles from '@/components/layouts/PopDarkShellLayout.module.css'
+  HeaderSections,
+  POP_SCREEN_DEFAULT_AVATAR,
+  createPopHeaderMenuOptions
+} from '@/components/HeaderSections'
 import { ARTICLE_DELETE_CONFIRM_PHRASE } from './articleConstants'
 import {
   deletePopArticle,
@@ -34,7 +36,7 @@ function formatMoney (n: number): string {
 const Page = () => {
   const router = useRouter()
   const params = useParams()
-  const { user } = useAuth()
+  const { user, logOut } = useAuth()
   const { hasPermissionDef } = usePopPermissions()
   const popId = params?.pop as string | undefined
 
@@ -190,43 +192,48 @@ const Page = () => {
 
   if (!popId) {
     return (
-      <div style={{ padding: 40, color: '#fff' }}>
-        <Body size='md' color='white'>
-          ID de POP no encontrado
-        </Body>
+      <div style={{ padding: 40, color: 'var(--foreground, #171717)' }}>
+        <Body size='md'>ID de POP no encontrado</Body>
       </div>
     )
   }
 
+  const headerMenuOptions = createPopHeaderMenuOptions(router, logOut)
+
   return (
-    <PopDarkShellLayout
-      popId={popId}
-      sectionTitle='Artículos'
-      popName={popName}
-      userAvatarSrc={userAvatarSrc}
-    >
-      {loading ? (
-        <div className={popShellStyles.centeredMessage}>
-          <Body size='md' color='white'>
-            Cargando…
-          </Body>
-        </div>
-      ) : error ? (
-        <div className={popShellStyles.centeredMessage}>
-          <Body size='md' color='white'>
-            {error}
-          </Body>
-        </div>
-      ) : (
-        <div className={styles.inner}>
-          <div style={{ marginBottom: 20 }}>
-            <Title color='white'>Artículos</Title>
-            <div className={styles.lead}>
-              <Body size='sm' color='white'>
-                Listado de artículos del punto de venta.
-              </Body>
-            </div>
+    <>
+    <PopScreenLayout
+      header={
+        <HeaderSections
+          popId={popId}
+          sectionName='Artículos'
+          popName={popName}
+          userImageSrc={userAvatarSrc}
+          userImageAlt={
+            user?.user_metadata?.full_name || user?.email || 'Usuario'
+          }
+          menuOptions={headerMenuOptions}
+        />
+      }
+      body={
+        loading ? (
+          <div className={popShellStyles.centeredMessage}>
+            <Body size='md'>Cargando…</Body>
           </div>
+        ) : error ? (
+          <div className={popShellStyles.centeredMessage}>
+            <Body size='md'>{error}</Body>
+          </div>
+        ) : (
+          <div className={styles.inner}>
+            <div style={{ marginBottom: 20 }}>
+              <Title>Artículos</Title>
+              <div className={styles.lead}>
+                <Body size='sm' color='grayscale-500'>
+                  Listado de artículos del punto de venta.
+                </Body>
+              </div>
+            </div>
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -304,9 +311,10 @@ const Page = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
-
+          </div>
+        )
+      }
+    />
       {editRow ? (
         <div
           className={styles.modalBackdrop}
@@ -509,7 +517,7 @@ const Page = () => {
           </div>
         </div>
       ) : null}
-    </PopDarkShellLayout>
+    </>
   )
 }
 

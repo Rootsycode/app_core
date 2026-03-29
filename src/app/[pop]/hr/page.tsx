@@ -6,11 +6,13 @@ import { useParams, useRouter } from 'next/navigation'
 import withAuth from '@/hoc/withAuth'
 import { useAuth } from '@/context/AuthContextSupabase'
 import { Body, ButtonRs, Title } from 'rootsy-feparts'
+import { PopScreenLayout } from '@/components/layouts/PopScreenLayout'
+import popShellStyles from '@/components/layouts/PopScreenLayout.module.css'
 import {
-  PopDarkShellLayout,
-  POP_SCREEN_DEFAULT_AVATAR
-} from '@/components/layouts/PopDarkShellLayout'
-import popShellStyles from '@/components/layouts/PopDarkShellLayout.module.css'
+  HeaderSections,
+  POP_SCREEN_DEFAULT_AVATAR,
+  createPopHeaderMenuOptions
+} from '@/components/HeaderSections'
 import {
   deactivatePopMember,
   deletePopRole,
@@ -45,7 +47,7 @@ function groupMembersByRole (members: MemberRow[]): [string, MemberRow[]][] {
 const Page = () => {
   const router = useRouter()
   const params = useParams()
-  const { user } = useAuth()
+  const { user, logOut } = useAuth()
   const popId = params?.pop as string | undefined
 
   const [loading, setLoading] = useState(true)
@@ -273,44 +275,49 @@ const Page = () => {
 
   if (!popId) {
     return (
-      <div style={{ padding: 40, color: '#fff' }}>
-        <Body size='md' color='white'>
-          ID de POP no encontrado
-        </Body>
+      <div style={{ padding: 40, color: 'var(--foreground, #171717)' }}>
+        <Body size='md'>ID de POP no encontrado</Body>
       </div>
     )
   }
 
+  const headerMenuOptions = createPopHeaderMenuOptions(router, logOut)
+
   return (
-    <PopDarkShellLayout
-      popId={popId}
-      sectionTitle='RRHH'
-      popName={popName}
-      userAvatarSrc={userAvatarSrc}
-    >
-      {loading ? (
-        <div className={popShellStyles.centeredMessage}>
-          <Body size='md' color='white'>
-            Cargando…
-          </Body>
-        </div>
-      ) : error ? (
-        <div className={popShellStyles.centeredMessage}>
-          <Body size='md' color='white'>
-            {error}
-          </Body>
-        </div>
-      ) : (
-        <div className={styles.inner}>
-          <div style={{ marginBottom: 20 }}>
-            <Title color='white'>Recursos humanos</Title>
-            <div className={styles.lead}>
-              <Body size='sm' color='white'>
-                Roles del punto de venta y personas con acceso. Las invitaciones las gestiona el
-                dueño del POP.
-              </Body>
-            </div>
+    <>
+    <PopScreenLayout
+      header={
+        <HeaderSections
+          popId={popId}
+          sectionName='RRHH'
+          popName={popName}
+          userImageSrc={userAvatarSrc}
+          userImageAlt={
+            user?.user_metadata?.full_name || user?.email || 'Usuario'
+          }
+          menuOptions={headerMenuOptions}
+        />
+      }
+      body={
+        loading ? (
+          <div className={popShellStyles.centeredMessage}>
+            <Body size='md'>Cargando…</Body>
           </div>
+        ) : error ? (
+          <div className={popShellStyles.centeredMessage}>
+            <Body size='md'>{error}</Body>
+          </div>
+        ) : (
+          <div className={styles.inner}>
+            <div style={{ marginBottom: 20 }}>
+              <Title>Recursos humanos</Title>
+              <div className={styles.lead}>
+                <Body size='sm' color='grayscale-500'>
+                  Roles del punto de venta y personas con acceso. Las invitaciones las gestiona el
+                  dueño del POP.
+                </Body>
+              </div>
+            </div>
 
           {banner ? (
             <div
@@ -569,7 +576,9 @@ const Page = () => {
             </div>
           </div>
         </div>
-      )}
+        )
+      }
+    />
 
       {permModalRole ? (
         <div
@@ -649,7 +658,7 @@ const Page = () => {
           </div>
         </div>
       ) : null}
-    </PopDarkShellLayout>
+    </>
   )
 }
 

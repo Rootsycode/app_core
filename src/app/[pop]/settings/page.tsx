@@ -9,11 +9,13 @@ import { useAuth } from '@/context/AuthContextSupabase'
 import { usePopPermissions } from '@/context/PopPermissionsContext'
 import { POP_PERMS } from '@/lib/popPermissionConstants'
 import { Body, ButtonRs, Title } from 'rootsy-feparts'
+import { PopScreenLayout } from '@/components/layouts/PopScreenLayout'
+import popShellStyles from '@/components/layouts/PopScreenLayout.module.css'
 import {
-  PopDarkShellLayout,
-  POP_SCREEN_DEFAULT_AVATAR
-} from '@/components/layouts/PopDarkShellLayout'
-import popShellStyles from '@/components/layouts/PopDarkShellLayout.module.css'
+  HeaderSections,
+  POP_SCREEN_DEFAULT_AVATAR,
+  createPopHeaderMenuOptions
+} from '@/components/HeaderSections'
 import {
   getPopSettingsForEdit,
   updatePopSettings,
@@ -30,7 +32,7 @@ function storagePublicUrlWithCacheBust (publicUrl: string): string {
 const Page = () => {
   const router = useRouter()
   const params = useParams()
-  const { user } = useAuth()
+  const { user, logOut } = useAuth()
   const { permissionKeys, hasPermissionDef } = usePopPermissions()
   const supabase = createClientComponentClient()
   const popId = params?.pop as string | undefined
@@ -236,43 +238,49 @@ const Page = () => {
 
   if (!popId) {
     return (
-      <div style={{ padding: 40, color: '#fff' }}>
-        <Body size='md' color='white'>
-          ID de POP no encontrado
-        </Body>
+      <div style={{ padding: 40, color: 'var(--foreground, #171717)' }}>
+        <Body size='md'>ID de POP no encontrado</Body>
       </div>
     )
   }
 
+  const headerMenuOptions = createPopHeaderMenuOptions(router, logOut)
+
   return (
-    <PopDarkShellLayout
-      popId={popId}
-      sectionTitle='Configuración'
-      popName={popData?.name ?? ''}
-      userAvatarSrc={userAvatarSrc}
-    >
-      {loading ? (
-        <div className={popShellStyles.centeredMessage}>
-          <Body size='md' color='white'>
-            Cargando…
-          </Body>
-        </div>
-      ) : error || !popData ? (
-        <div className={popShellStyles.centeredMessage}>
-          <Body size='md' color='white'>
-            {error || 'No se encontraron datos del POP'}
-          </Body>
-        </div>
-      ) : (
-        <div className={styles.inner}>
-          <div style={{ marginBottom: 20 }}>
-            <Title color='white'>Punto de venta</Title>
-            <div className={styles.lead}>
-              <Body size='sm' color='white'>
-                Nombre, domicilio e imágenes de marca. Los cambios se guardan en tu POP.
-              </Body>
-            </div>
+    <PopScreenLayout
+      header={
+        <HeaderSections
+          popId={popId}
+          sectionName='Configuración'
+          popName={popData?.name ?? name}
+          userImageSrc={userAvatarSrc}
+          userImageAlt={
+            user?.user_metadata?.full_name || user?.email || 'Usuario'
+          }
+          menuOptions={headerMenuOptions}
+        />
+      }
+      body={
+        loading ? (
+          <div className={popShellStyles.centeredMessage}>
+            <Body size='md'>Cargando…</Body>
           </div>
+        ) : error || !popData ? (
+          <div className={popShellStyles.centeredMessage}>
+            <Body size='md'>
+              {error || 'No se encontraron datos del POP'}
+            </Body>
+          </div>
+        ) : (
+          <div className={styles.inner}>
+            <div style={{ marginBottom: 20 }}>
+              <Title>Punto de venta</Title>
+              <div className={styles.lead}>
+                <Body size='sm' color='grayscale-500'>
+                  Nombre, domicilio e imágenes de marca. Los cambios se guardan en tu POP.
+                </Body>
+              </div>
+            </div>
 
           {popData && canReadSettings && !canEdit ? (
             <div
@@ -407,7 +415,7 @@ const Page = () => {
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Imágenes de marca</div>
               <div className={styles.hint}>
-                <Body size='xs' color='white'>
+                <Body size='xs' color='grayscale-500'>
                   Bucket público pop-assets, carpeta {popId}.
                 </Body>
               </div>
@@ -440,7 +448,7 @@ const Page = () => {
                         if (f) void uploadPopAsset(f, 'logo')
                       }}
                     />
-                    <Body size='xs' color='white'>
+                    <Body size='xs' color='grayscale-500'>
                       {uploadKey === 'logo' ? 'Subiendo…' : ' '}
                     </Body>
                   </div>
@@ -492,7 +500,7 @@ const Page = () => {
                         if (f) void uploadPopAsset(f, 'background')
                       }}
                     />
-                    <Body size='xs' color='white'>
+                    <Body size='xs' color='grayscale-500'>
                       {uploadKey === 'background' ? 'Subiendo…' : ' '}
                     </Body>
                   </div>
@@ -543,7 +551,7 @@ const Page = () => {
                         if (f) void uploadPopAsset(f, 'invoice-logo')
                       }}
                     />
-                    <Body size='xs' color='white'>
+                    <Body size='xs' color='grayscale-500'>
                       {uploadKey === 'invoice-logo' ? 'Subiendo…' : ' '}
                     </Body>
                   </div>
@@ -599,8 +607,9 @@ const Page = () => {
             )}
           </form>
         </div>
-      )}
-    </PopDarkShellLayout>
+        )
+      }
+    />
   )
 }
 

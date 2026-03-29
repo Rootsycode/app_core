@@ -1,7 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { requireAuthenticatedUser } from './authHelpers'
 import { isPopActive } from './subscriptions'
 
@@ -13,8 +12,7 @@ export async function createPop (data: {
 }) {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data: canCreate, error: canCreateError } = await supabase.rpc(
       'can_user_create_pop',
@@ -109,8 +107,7 @@ export type GetPopByIdOptions = {
 export async function getPopById (popId: string, options?: GetPopByIdOptions) {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data: hasAccess, error: accessError } = await supabase.rpc(
       'user_has_pop_access',
@@ -193,8 +190,7 @@ export async function validatePopAccess (popId: string): Promise<{
 }> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data: hasAccess, error: accessError } = await supabase.rpc(
       'user_has_pop_access',

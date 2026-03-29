@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 
-export async function GET() {
+export async function GET () {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('subscription_plans')
@@ -22,4 +20,3 @@ export async function GET() {
     return NextResponse.json([], { status: 200 })
   }
 }
-

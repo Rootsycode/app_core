@@ -1,7 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { requireAuthenticatedUser } from '@/lib/authHelpers'
 import { getPopSubscriptionInfo } from '@/lib/subscriptions'
 
@@ -19,8 +18,7 @@ export type SubscribePageData =
 export async function getSubscribePageData (popId: string): Promise<SubscribePageData> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data: hasAccess, error: accessError } = await supabase.rpc(
       'user_has_pop_access',
@@ -71,8 +69,7 @@ export async function simulateActivatePopSubscription (
 ): Promise<SimulatePayResult> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data: hasAccess, error: accessError } = await supabase.rpc(
       'user_has_pop_access',

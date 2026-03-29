@@ -1,7 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { requireAuthenticatedUser } from './authHelpers'
 
 export async function canUserCreatePop (): Promise<{
@@ -10,8 +9,7 @@ export async function canUserCreatePop (): Promise<{
 }> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('can_user_create_pop', {
       user_id: user.uid
@@ -51,8 +49,7 @@ export async function canUserCreatePop (): Promise<{
 
 export async function isPopActive (popId: string): Promise<boolean> {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('is_pop_active', {
       pop_id: popId
@@ -72,8 +69,7 @@ export async function getTrialDaysRemaining (
   popId: string
 ): Promise<number | null> {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('get_trial_days_remaining', {
       pop_id: popId
@@ -91,8 +87,7 @@ export async function getTrialDaysRemaining (
 
 export async function getPopSubscriptionInfo (popId: string) {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('get_pop_subscription_info', {
       pop_id: popId
@@ -110,8 +105,7 @@ export async function getPopSubscriptionInfo (popId: string) {
 
 export async function getSubscriptionPlans () {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('subscription_plans')
@@ -131,8 +125,7 @@ export async function getSubscriptionPlans () {
 
 export async function getBusinessTypes () {
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('business_types')

@@ -29,3 +29,13 @@
   background-color: var(--grayscale-100, #fafafa);
   box-sizing: border-box;
 }
+
+.centeredMessage {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--foreground, #171717);
+}

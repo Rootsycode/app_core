@@ -1,7 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { requireAuthenticatedUser } from './authHelpers'
 
 export async function checkUserPermission (
@@ -11,8 +10,7 @@ export async function checkUserPermission (
 ): Promise<boolean> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('user_has_permission', {
       pop_id: popId,
@@ -34,8 +32,7 @@ export async function checkUserPermission (
 export async function checkUserPopAccess (popId: string): Promise<boolean> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('user_has_pop_access', {
       pop_id: popId,
@@ -55,8 +52,7 @@ export async function checkUserPopAccess (popId: string): Promise<boolean> {
 export async function getUserPopRole (popId: string): Promise<string | null> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('get_user_pop_role_name', {
       pop_id: popId,

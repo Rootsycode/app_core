@@ -1,6 +1,5 @@
 'use client'
 
-import type { ReactNode } from 'react'
 import {
   Menu as RACMenu,
   MenuTrigger,
@@ -10,25 +9,12 @@ import { Body, ButtonIcon, MenuItem, Title } from 'rootsy-feparts'
 import { ChevronLeft24 } from '@/components/atoms/icons/ChevronLeft24'
 import { OptionsIcon24 } from '@/components/atoms/icons/OptionsIcon24'
 import styles from './HeaderSections.module.css'
+import type { HeaderSectionsProps } from './types'
 
-export type HeaderSectionsMenuOption = {
-  icon: ReactNode
-  name: string
-  /** Navegación estándar (enlace). */
-  href?: string
-  /** Acción (p. ej. cerrar sesión); si está definida, tiene prioridad sobre `href`. */
-  onAction?: () => void | Promise<void>
-}
-
-export type HeaderSectionsProps = {
-  popId: string
-  sectionName: string
-  popName: string
-  userImageSrc: string
-  userImageAlt?: string
-  /** Opciones del menú ⋮: `href` y/o `onAction` por ítem. */
-  menuOptions: HeaderSectionsMenuOption[]
-}
+export type {
+  HeaderSectionsMenuOption,
+  HeaderSectionsProps
+} from './types'
 
 function popoverInvertedClass ({
   defaultClassName
@@ -62,7 +48,7 @@ export function HeaderSections ({
       </div>
 
       <div className={styles.colCenter}>
-        <Title color='white' className={styles.sectionTitle}>
+        <Title color='white' size='xs'>
           {sectionName}
         </Title>
       </div>
@@ -110,3 +96,6 @@ export function HeaderSections ({
     </header>
   )
 }
+
+export { POP_SCREEN_DEFAULT_AVATAR } from './constants'
+export { createPopHeaderMenuOptions } from './defaultMenuOptions'

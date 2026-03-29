@@ -1,8 +1,7 @@
 'use server'
 
 import { requireAuthenticatedUser } from '@/lib/authHelpers'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 
 export type UserProfileDTO = {
   email: string | null
@@ -80,8 +79,7 @@ function mapRowToDto (
 export async function getUserProfile (): Promise<UserProfileDTO> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const { data: userProfile, error } = await supabase
       .from('users')
@@ -178,8 +176,7 @@ export async function updateUserProfile (
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const supabase = await createClient()
 
     const row: Record<string, unknown> = {}
     if (payload.firstName !== undefined) row.first_name = payload.firstName
@@ -217,8 +214,7 @@ export async function updateUserProfile (
 
 export async function getUserPops () {
   const user = await requireAuthenticatedUser()
-  const cookieStore = await cookies()
-  const supabase = createServerActionClient({ cookies: () => cookieStore })
+  const supabase = await createClient()
 
   try {
     const { data: accessiblePops, error: popsError } = await supabase.rpc(

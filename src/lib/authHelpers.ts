@@ -1,11 +1,9 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 
 export async function requireAuthenticatedUser () {
-  const cookieStore = await cookies()
-  const supabase = createServerActionClient({ cookies: () => cookieStore })
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -26,8 +24,7 @@ export async function getAuthenticatedUserOrNull (): Promise<{
   uid: string
   email: string | undefined
 } | null> {
-  const cookieStore = await cookies()
-  const supabase = createServerActionClient({ cookies: () => cookieStore })
+  const supabase = await createClient()
   const {
     data: { user },
     error
