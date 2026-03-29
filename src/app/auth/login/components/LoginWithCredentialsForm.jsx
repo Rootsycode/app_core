@@ -17,7 +17,6 @@ const LoginWithCredentialsForm = ({ router }) => {
   const isSubmittingRef = useRef(false)
   const supabase = createClientComponentClient()
 
-  // Validar un campo individual en tiempo real
   const validateField = (fieldName, value) => {
     let error = ''
     
@@ -33,17 +32,13 @@ const LoginWithCredentialsForm = ({ router }) => {
       }
     }
     
-    // Solo actualizar el error si el campo tiene un error o si estaba en error y ahora es válido
     setFieldErrors(prev => {
-      // Si el campo tenía un error y ahora es válido, limpiarlo
       if (prev[fieldName] && !error) {
         return { ...prev, [fieldName]: '' }
       }
-      // Si el campo tiene un error, actualizarlo
       if (error) {
         return { ...prev, [fieldName]: error }
       }
-      // Si no hay error y no había error antes, no hacer nada
       return prev
     })
   }
@@ -55,7 +50,6 @@ const LoginWithCredentialsForm = ({ router }) => {
     }
     let isValid = true
 
-    // Validar email
     if (!email || email.trim() === '') {
       errors.email = 'El correo electrónico es requerido'
       isValid = false
@@ -64,7 +58,6 @@ const LoginWithCredentialsForm = ({ router }) => {
       isValid = false
     }
 
-    // Validar contraseña
     if (!password || password === '') {
       errors.password = 'La contraseña es requerida'
       isValid = false
@@ -78,16 +71,13 @@ const LoginWithCredentialsForm = ({ router }) => {
     e.preventDefault()
     setError('')
     
-    // Marcar que estamos en proceso de validación
     isSubmittingRef.current = true
     
     const email = e.target.email?.value?.trim() || ''
     const password = e.target.password?.value || ''
 
-    // Validar formulario antes de enviar
     const isValid = validateForm(email, password)
     if (!isValid) {
-      // Los errores ya se establecieron en validateForm
       setTimeout(() => {
         isSubmittingRef.current = false
         setFieldErrors(currentErrors => {
@@ -107,7 +97,6 @@ const LoginWithCredentialsForm = ({ router }) => {
       return
     }
     
-    // Si la validación pasa, permitir que onInput valide campos
     isSubmittingRef.current = false
     setIsLoading(true)
 
@@ -120,14 +109,12 @@ const LoginWithCredentialsForm = ({ router }) => {
         throw error
       }
       if (data) {
-        // Esperar un momento para que las cookies se establezcan
         await new Promise(resolve => setTimeout(resolve, 100))
-        router.push('/profile')
-        router.refresh() // Forzar refresh para que el contexto actualice
+        router.push('/home')
+        router.refresh()
       }
       setIsLoading(false)
     } catch (error) {
-      // Manejar errores específicos de Supabase
       const errorMsg = error.message?.toLowerCase() || ''
       if (errorMsg.includes('invalid login credentials') || 
           errorMsg.includes('invalid credentials') ||
@@ -165,7 +152,6 @@ const LoginWithCredentialsForm = ({ router }) => {
         onInput={(e) => validateField('password', e.target.value)}
       />
 
-      {/* Mostrar errores del servidor (credenciales incorrectas, etc.) */}
       {error && (
         <Body size='sm' style={{ marginBottom: '16px', color: 'var(--invalid-color, #ef4444)' }}>
           {error}

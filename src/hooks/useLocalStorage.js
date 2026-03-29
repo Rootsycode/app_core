@@ -2,9 +2,6 @@
 
 import { useCallback, useState } from 'react'
 
-/**
- * Persiste estado en localStorage (solo cliente). Compatible con el patrón de SaleContext.
- */
 export function useLocalStorage (key, initialValue) {
   const [state, setState] = useState(() => {
     if (typeof window === 'undefined') return initialValue
@@ -26,7 +23,6 @@ export function useLocalStorage (key, initialValue) {
         try {
           window.localStorage.setItem(key, JSON.stringify(next))
         } catch {
-          /* ignore quota / private mode */
         }
         return next
       })

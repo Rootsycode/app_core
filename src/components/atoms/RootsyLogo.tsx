@@ -5,7 +5,6 @@ interface RootsyLogoProps {
   height?: number
   className?: string
   textColor?: string
-  /** Por defecto el texto va centrado en el viewBox; `left` alinea a la izquierda. */
   align?: 'center' | 'left'
 }
 

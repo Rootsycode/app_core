@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { schemas } from '../../../../../../domain/global/schemas' // Importar los schemas
+import { schemas } from '../../../../../../domain/global/schemas'
 
-// 📌 Verificar si la tabla existe en Supabase
 async function tableExists (schema: string, table: string) {
   const { data, error } = await supabase
     .from('pg_tables')
@@ -10,11 +9,9 @@ async function tableExists (schema: string, table: string) {
     .eq('schemaname', schema)
     .eq('tablename', table)
 
-  console.log(data) // Debug
   return data && data.length > 0
 }
 
-// 📌 Crear la tabla si no existe
 async function createTable (
   schema: string,
   table: string,
@@ -41,23 +38,17 @@ async function createTable (
 
   sql += columns.join(', ') + ');'
 
-  const { error } = await supabase.rpc('execute_sql', { query: sql })
-
-  if (error)
-    console.error(`❌ Error creando la tabla "${schema}.${table}":`, error)
-  else console.log(`✅ Tabla "${schema}.${table}" creada.`)
+  await supabase.rpc('execute_sql', { query: sql })
 }
 
-// 📌 API Router
 export async function POST (
   req: NextRequest,
   { params }: { params: { schema: string; table: string } }
 ) {
   const { schema, table } = params
-  const schemaDefinition = schemas[table] // Buscar el schema basado en la tabla
+  const schemaDefinition = schemas[table]
 
   if (!schemaDefinition) {
-    console.log('❌ Schema no encontrado:', table) // Debug
     return NextResponse.json({ error: 'Schema no encontrado' }, { status: 400 })
   }
 
@@ -71,7 +62,6 @@ export async function POST (
   return NextResponse.json({ message: 'Dato insertado correctamente' })
 }
 
-// 📌 Obtener todos los datos
 export async function GET (
   req: NextRequest,
   { params }: { params: { schema: string; table: string } }
@@ -82,9 +72,7 @@ export async function GET (
     .from(table)
     .select('last_name')
 
-  const { data: user, error: userError } = await supabase.auth.getUser();
-    console.log("📌 Usuario autenticado:", user, userError);
-    
+  const { data: user, error: userError } = await supabase.auth.getUser()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({
@@ -94,7 +82,6 @@ export async function GET (
   })
 }
 
-// 📌 Actualizar datos
 export async function PUT (
   req: NextRequest,
   { params }: { params: { schema: string; table: string } }
@@ -111,7 +98,6 @@ export async function PUT (
   return NextResponse.json({ message: 'Dato actualizado correctamente' })
 }
 
-// 📌 Eliminar datos
 export async function DELETE (
   req: NextRequest,
   { params }: { params: { schema: string; table: string } }

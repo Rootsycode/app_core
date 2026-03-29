@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, type CSSProperties } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import useEmblaCarousel from 'embla-carousel-react'
 import withAuth from '@/hoc/withAuth'
@@ -25,6 +25,14 @@ import { AlertIcon24 } from '@/components/atoms/icons/AlertIcon24'
 import { MENU } from '@/constant/Menu'
 import { getPopMenuData } from './actions'
 import styles from './page.module.css'
+
+function menuGridBackgroundStyle (
+  backgroundImageUrl: string | null | undefined
+): CSSProperties | undefined {
+  const u = backgroundImageUrl?.trim()
+  if (!u) return undefined
+  return { backgroundImage: `url(${JSON.stringify(u)})` }
+}
 
 interface ButtonSection {
   icon?: React.ReactNode
@@ -59,12 +67,12 @@ const Page = () => {
     name: string
     imageUrl: string | null
     address: string | null
+    backgroundImageUrl?: string | null
   } | null>(null)
   const [permissions, setPermissions] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Cargar datos del POP y permisos
   useEffect(() => {
     if (!popId) {
       setLoading(false)
@@ -89,10 +97,8 @@ const Page = () => {
           return
         }
 
-        // Usar un batch update para evitar múltiples re-renders
         setPopData(result.pop!)
         setPermissions(result.permissions || {})
-        // Usar setTimeout para que el setLoading se ejecute después del render
         setTimeout(() => {
           setLoading(false)
         }, 0)
@@ -108,7 +114,6 @@ const Page = () => {
     loadPopData()
   }, [popId, router])
 
-  // Re-inicializar Embla solo cuando los datos estén listos
   useEffect(() => {
     if (emblaApi && !loading && popData) {
       emblaApi.reInit()
@@ -116,16 +121,14 @@ const Page = () => {
   }, [emblaApi, loading, popData])
 
   const handleHomeClick = () => {
-    router.push('/profile')
+    router.push('/home')
   }
 
   const handleMenuItemClick = (link?: string) => {
     if (!link || !popId) return
-    // Navegar a la sección correspondiente
     router.push(`/${popId}/${link}`)
   }
 
-  // Memoizar los items del menú procesados para evitar recalcular en cada render
   const processedMenuItems = useMemo(() => {
     if (!popData || Object.keys(permissions).length === 0) return []
 
@@ -183,7 +186,10 @@ const Page = () => {
 
   return (
     <>
-      <div className={styles.grid}>
+      <div
+        className={styles.grid}
+        style={menuGridBackgroundStyle(popData.backgroundImageUrl)}
+      >
         <header className={styles.header}>
           <div className={styles.left}>
             <ButtonIcon
@@ -249,7 +255,7 @@ const Page = () => {
             <MenuButton iconButton inverted>
               <MenuItem onAction={() => router.push('/profile')}>
                 <ProfileIcon16 />
-                Ver perfil
+                Mi cuenta
               </MenuItem>
               <MenuItem>
                 <HelpIcon16 />

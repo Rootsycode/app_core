@@ -14,13 +14,11 @@ export async function GET() {
       .order('display_name', { ascending: true })
 
     if (error) {
-      console.error('Error getting business types:', error)
       return NextResponse.json([], { status: 200 })
     }
 
     return NextResponse.json(data || [])
-  } catch (error) {
-    console.error('Error getting business types:', error)
+  } catch {
     return NextResponse.json([], { status: 200 })
   }
 }

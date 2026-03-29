@@ -1,25 +1,98 @@
-'use server';
+'use server'
 
-import { requireAuthenticatedUser } from '@/lib/authHelpers';
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { requireAuthenticatedUser } from '@/lib/authHelpers'
+import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
-export async function getUserProfile() {
+export type UserProfileDTO = {
+  email: string | null
+  firstName: string
+  lastName: string
+  fullName: string
+  imageUrl: string | null
+  phone: string | null
+  address: string | null
+  city: string | null
+  state: string | null
+  country: string | null
+  postalCode: string | null
+  dateOfBirth: string | null
+  gender: string | null
+  bio: string | null
+  website: string | null
+  timezone: string | null
+  language: string | null
+  isEmailVerified: boolean
+  isPhoneVerified: boolean
+  lastLoginAt: string | null
+  metadata: Record<string, unknown>
+}
+
+export type UpdateUserProfileInput = {
+  firstName?: string
+  lastName?: string
+  phone?: string | null
+  imageUrl?: string | null
+  address?: string | null
+  city?: string | null
+  state?: string | null
+  country?: string | null
+  postalCode?: string | null
+  dateOfBirth?: string | null
+  gender?: string | null
+  bio?: string | null
+  website?: string | null
+  timezone?: string | null
+  language?: string | null
+}
+
+function mapRowToDto (
+  user: { email?: string | null },
+  row: Record<string, unknown>
+): UserProfileDTO {
+  const fn = String(row.first_name ?? '')
+  const ln = String(row.last_name ?? '')
+  return {
+    email: user.email ?? null,
+    firstName: fn,
+    lastName: ln,
+    fullName: `${fn} ${ln}`.trim(),
+    imageUrl: (row.image_url as string | null) ?? null,
+    phone: (row.phone as string | null) ?? null,
+    address: (row.address as string | null) ?? null,
+    city: (row.city as string | null) ?? null,
+    state: (row.state as string | null) ?? null,
+    country: (row.country as string | null) ?? null,
+    postalCode: (row.postal_code as string | null) ?? null,
+    dateOfBirth: (row.date_of_birth as string | null) ?? null,
+    gender: (row.gender as string | null) ?? null,
+    bio: (row.bio as string | null) ?? null,
+    website: (row.website as string | null) ?? null,
+    timezone: (row.timezone as string | null) ?? null,
+    language: (row.language as string | null) ?? null,
+    isEmailVerified: Boolean(row.is_email_verified),
+    isPhoneVerified: Boolean(row.is_phone_verified),
+    lastLoginAt: (row.last_login_at as string | null) ?? null,
+    metadata: (row.metadata as Record<string, unknown>) ?? {}
+  }
+}
+
+export async function getUserProfile (): Promise<UserProfileDTO> {
   try {
-    const user = await requireAuthenticatedUser();
-    const cookieStore = await cookies();
-    const supabase = createServerActionClient({ cookies: () => cookieStore });
+    const user = await requireAuthenticatedUser()
+    const cookieStore = await cookies()
+    const supabase = createServerActionClient({ cookies: () => cookieStore })
 
-    // Intentar obtener el perfil completo del usuario
     const { data: userProfile, error } = await supabase
       .from('users')
-      .select('first_name, last_name, image_url, phone, address, city, state, country, postal_code, date_of_birth, gender, bio, website, timezone, language, is_email_verified, is_phone_verified, last_login_at, metadata')
+      .select(
+        'first_name, last_name, image_url, phone, address, city, state, country, postal_code, date_of_birth, gender, bio, website, timezone, language, is_email_verified, is_phone_verified, last_login_at, metadata'
+      )
       .eq('id', user.uid)
-      .single();
+      .single()
 
-    // Si no existe, crearlo automáticamente
     if (error || !userProfile) {
-      const emailName = user.email?.split('@')[0] || 'Usuario';
+      const emailName = user.email?.split('@')[0] || 'Usuario'
       const { data: newProfile, error: createError } = await supabase
         .from('users')
         .insert({
@@ -30,68 +103,52 @@ export async function getUserProfile() {
           timezone: 'America/Argentina/Buenos_Aires',
           language: 'es'
         })
-        .select('first_name, last_name, image_url, phone, address, city, state, country, postal_code, date_of_birth, gender, bio, website, timezone, language, is_email_verified, is_phone_verified, last_login_at, metadata')
-        .single();
+        .select(
+          'first_name, last_name, image_url, phone, address, city, state, country, postal_code, date_of_birth, gender, bio, website, timezone, language, is_email_verified, is_phone_verified, last_login_at, metadata'
+        )
+        .single()
 
-      if (createError) {
-        console.error('Error creating user profile:', createError);
+      if (createError || !newProfile) {
         return {
+          email: user.email ?? null,
           firstName: emailName,
           lastName: '',
-          fullName: emailName
-        };
+          fullName: emailName,
+          imageUrl: null,
+          phone: null,
+          address: null,
+          city: null,
+          state: null,
+          country: 'AR',
+          postalCode: null,
+          dateOfBirth: null,
+          gender: null,
+          bio: null,
+          website: null,
+          timezone: 'America/Argentina/Buenos_Aires',
+          language: 'es',
+          isEmailVerified: false,
+          isPhoneVerified: false,
+          lastLoginAt: null,
+          metadata: {}
+        }
       }
 
-      return {
-        firstName: newProfile.first_name,
-        lastName: newProfile.last_name,
-        fullName: `${newProfile.first_name} ${newProfile.last_name}`.trim(),
-        imageUrl: newProfile.image_url,
-        phone: newProfile.phone,
-        address: newProfile.address,
-        city: newProfile.city,
-        state: newProfile.state,
-        country: newProfile.country,
-        postalCode: newProfile.postal_code,
-        dateOfBirth: newProfile.date_of_birth,
-        gender: newProfile.gender,
-        bio: newProfile.bio,
-        website: newProfile.website,
-        timezone: newProfile.timezone,
-        language: newProfile.language,
-        isEmailVerified: newProfile.is_email_verified,
-        isPhoneVerified: newProfile.is_phone_verified,
-        lastLoginAt: newProfile.last_login_at,
-        metadata: newProfile.metadata
-      };
+      return mapRowToDto(user, newProfile as Record<string, unknown>)
     }
 
+    return mapRowToDto(user, userProfile as Record<string, unknown>)
+  } catch {
+    let email: string | null = null
+    let emailName = 'Usuario'
+    try {
+      const u = await requireAuthenticatedUser()
+      email = u.email ?? null
+      emailName = u.email?.split('@')[0] || 'Usuario'
+    } catch {
+    }
     return {
-      firstName: userProfile.first_name,
-      lastName: userProfile.last_name,
-      fullName: `${userProfile.first_name} ${userProfile.last_name}`.trim(),
-      imageUrl: userProfile.image_url,
-      phone: userProfile.phone,
-      address: userProfile.address,
-      city: userProfile.city,
-      state: userProfile.state,
-      country: userProfile.country,
-      postalCode: userProfile.postal_code,
-      dateOfBirth: userProfile.date_of_birth,
-      gender: userProfile.gender,
-      bio: userProfile.bio,
-      website: userProfile.website,
-      timezone: userProfile.timezone,
-      language: userProfile.language,
-      isEmailVerified: userProfile.is_email_verified,
-      isPhoneVerified: userProfile.is_phone_verified,
-      lastLoginAt: userProfile.last_login_at,
-      metadata: userProfile.metadata
-    };
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    const emailName = (await requireAuthenticatedUser()).email?.split('@')[0] || 'Usuario';
-    return {
+      email,
       firstName: emailName,
       lastName: '',
       fullName: emailName,
@@ -112,45 +169,94 @@ export async function getUserProfile() {
       isPhoneVerified: false,
       lastLoginAt: null,
       metadata: {}
-    };
+    }
   }
 }
 
-export async function getUserPops() {
-  // Obtener el usuario autenticado
-  const user = await requireAuthenticatedUser();
-  const cookieStore = await cookies();
-  const supabase = createServerActionClient({ cookies: () => cookieStore });
+export async function updateUserProfile (
+  payload: UpdateUserProfileInput
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await requireAuthenticatedUser()
+    const cookieStore = await cookies()
+    const supabase = createServerActionClient({ cookies: () => cookieStore })
+
+    const row: Record<string, unknown> = {}
+    if (payload.firstName !== undefined) row.first_name = payload.firstName
+    if (payload.lastName !== undefined) row.last_name = payload.lastName
+    if (payload.phone !== undefined) row.phone = payload.phone
+    if (payload.imageUrl !== undefined) row.image_url = payload.imageUrl
+    if (payload.address !== undefined) row.address = payload.address
+    if (payload.city !== undefined) row.city = payload.city
+    if (payload.state !== undefined) row.state = payload.state
+    if (payload.country !== undefined) row.country = payload.country
+    if (payload.postalCode !== undefined) row.postal_code = payload.postalCode
+    if (payload.dateOfBirth !== undefined) row.date_of_birth = payload.dateOfBirth || null
+    if (payload.gender !== undefined) row.gender = payload.gender || null
+    if (payload.bio !== undefined) row.bio = payload.bio
+    if (payload.website !== undefined) row.website = payload.website || null
+    if (payload.timezone !== undefined) row.timezone = payload.timezone
+    if (payload.language !== undefined) row.language = payload.language
+
+    if (Object.keys(row).length === 0) {
+      return { success: true }
+    }
+
+    const { error } = await supabase.from('users').update(row).eq('id', user.uid)
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Error desconocido'
+    return { success: false, error: message }
+  }
+}
+
+export async function getUserPops () {
+  const user = await requireAuthenticatedUser()
+  const cookieStore = await cookies()
+  const supabase = createServerActionClient({ cookies: () => cookieStore })
 
   try {
-    // Usar la función helper para obtener POPs accesibles
-    const { data: accessiblePops, error: popsError } = await supabase
-      .rpc('get_user_accessible_pops', {
+    const { data: accessiblePops, error: popsError } = await supabase.rpc(
+      'get_user_accessible_pops',
+      {
         user_id: user.uid
-      });
+      }
+    )
 
     if (popsError) {
-      console.error('Error fetching accessible pops:', popsError);
-      return [];
+      return []
     }
 
-    // Si no hay POPs, retornar array vacío
     if (!accessiblePops || accessiblePops.length === 0) {
-      return [];
+      return []
     }
 
-    // Obtener información de suscripción para cada POP
-    const popsWithSubscription = await Promise.all(
-      accessiblePops.map(async (pop) => {
-        try {
-          // Obtener información de suscripción
-          const { data: subscriptionInfo, error: subscriptionError } = await supabase
-            .rpc('get_pop_subscription_info', {
-              pop_id: pop.pop_id
-            });
+    type PopRow = {
+      pop_id: string
+      pop_name: string
+      role_id: string
+      role_name: string
+      is_owner: boolean
+    }
 
-          // Si hay error o no hay datos, continuar sin suscripción
-          if (subscriptionError || !subscriptionInfo || subscriptionInfo.length === 0) {
+    const popsWithSubscription = await Promise.all(
+      (accessiblePops as PopRow[]).map(async (pop) => {
+        try {
+          const { data: subscriptionInfo, error: subscriptionError } =
+            await supabase.rpc('get_pop_subscription_info', {
+              pop_id: pop.pop_id
+            })
+
+          if (
+            subscriptionError ||
+            !subscriptionInfo ||
+            subscriptionInfo.length === 0
+          ) {
             return {
               id: pop.pop_id,
               name: pop.pop_name,
@@ -159,10 +265,10 @@ export async function getUserPops() {
               roleName: pop.role_name,
               isOwner: pop.is_owner,
               subscription: null
-            };
+            }
           }
 
-          const subscription = subscriptionInfo[0];
+          const subscription = subscriptionInfo[0]
 
           return {
             id: pop.pop_id,
@@ -182,10 +288,8 @@ export async function getUserPops() {
               trialEndsAt: subscription.trial_ends_at,
               currentPeriodEnd: subscription.current_period_end
             }
-          };
-        } catch (err) {
-          console.error(`Error getting subscription for POP ${pop.pop_id}:`, err);
-          // Retornar POP sin suscripción en caso de error
+          }
+        } catch {
           return {
             id: pop.pop_id,
             name: pop.pop_name,
@@ -194,14 +298,13 @@ export async function getUserPops() {
             roleName: pop.role_name,
             isOwner: pop.is_owner,
             subscription: null
-          };
+          }
         }
       })
-    );
+    )
 
-    return popsWithSubscription;
-  } catch (error) {
-    console.error('Error fetching pops:', error);
-    return []; // Devolver array vacío en caso de error
+    return popsWithSubscription
+  } catch {
+    return []
   }
 }

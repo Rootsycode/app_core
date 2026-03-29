@@ -76,7 +76,7 @@ export function PopHeader({ popData, showSearch = true, searchPlaceholder = 'Bus
         <MenuButton iconButton>
           <MenuItem onAction={() => router.push('/profile')}>
             <ProfileIcon16 />
-            Ver perfil
+            Mi cuenta
           </MenuItem>
           <MenuItem>
             <HelpIcon16 />

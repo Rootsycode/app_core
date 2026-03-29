@@ -30,7 +30,7 @@ export function ToolBox ({ popId, sectionName }) {
         <MenuButton iconButton inverted>
           <MenuItem onAction={() => router.push('/profile')}>
             <ProfileIcon16 />
-            Ver perfil
+            Mi cuenta
           </MenuItem>
           <MenuItem>
             <HelpIcon16 />

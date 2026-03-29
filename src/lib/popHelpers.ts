@@ -5,21 +5,17 @@ import { cookies } from 'next/headers'
 import { requireAuthenticatedUser } from './authHelpers'
 import { isPopActive } from './subscriptions'
 
-/**
- * Crea un nuevo POP con validación de límites
- */
-export async function createPop(data: {
+export async function createPop (data: {
   name: string
   businessTypeId?: string
   imageUrl?: string
-  settings?: Record<string, any>
+  settings?: Record<string, unknown>
 }) {
   try {
     const user = await requireAuthenticatedUser()
     const cookieStore = await cookies()
     const supabase = createServerActionClient({ cookies: () => cookieStore })
 
-    // Verificar si el usuario puede crear un POP
     const { data: canCreate, error: canCreateError } = await supabase.rpc(
       'can_user_create_pop',
       {
@@ -36,7 +32,6 @@ export async function createPop(data: {
     }
 
     if (!canCreate) {
-      // Verificar cuántos POPs tiene
       const { data: existingPops } = await supabase
         .from('pops')
         .select('id')
@@ -58,7 +53,6 @@ export async function createPop(data: {
       }
     }
 
-    // Crear el POP (el trigger creará automáticamente la suscripción trial)
     const { data: newPop, error: createError } = await supabase
       .from('pops')
       .insert({
@@ -80,39 +74,44 @@ export async function createPop(data: {
       }
     }
 
-    // Obtener información de la suscripción creada
-    const { data: subscriptionInfo } = await supabase
-      .rpc('get_pop_subscription_info', {
+    const { data: subscriptionInfo } = await supabase.rpc(
+      'get_pop_subscription_info',
+      {
         pop_id: newPop.id
-      })
+      }
+    )
 
     return {
       success: true,
       pop: {
         ...newPop,
-        subscription: subscriptionInfo && subscriptionInfo.length > 0 ? subscriptionInfo[0] : null
+        subscription:
+          subscriptionInfo && subscriptionInfo.length > 0
+            ? subscriptionInfo[0]
+            : null
       }
     }
-  } catch (error: any) {
-    console.error('Error creating POP:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido'
     return {
       success: false,
       error: 'Error inesperado',
-      details: error.message
+      details: message
     }
   }
 }
 
-/**
- * Obtiene los datos de un POP por ID
- */
-export async function getPopById(popId: string) {
+export type GetPopByIdOptions = {
+  /** Solo para lógica servidor (p. ej. permisos). No enviar al cliente en menú. */
+  includeOwnerUserId?: boolean
+}
+
+export async function getPopById (popId: string, options?: GetPopByIdOptions) {
   try {
     const user = await requireAuthenticatedUser()
     const cookieStore = await cookies()
     const supabase = createServerActionClient({ cookies: () => cookieStore })
 
-    // Verificar acceso primero
     const { data: hasAccess, error: accessError } = await supabase.rpc(
       'user_has_pop_access',
       {
@@ -128,10 +127,11 @@ export async function getPopById(popId: string) {
       }
     }
 
-    // Obtener datos del POP
     const { data: pop, error: popError } = await supabase
       .from('pops')
-      .select('id, name, image_url, settings, owner_user_id, business_type_id')
+      .select(
+        'id, name, image_url, settings, owner_user_id, business_type_id, country, state, city, street_address, postal_code, phone, background_image_url, invoice_logo_url'
+      )
       .eq('id', popId)
       .single()
 
@@ -142,21 +142,43 @@ export async function getPopById(popId: string) {
       }
     }
 
-    // Obtener dirección desde settings si existe
-    const address = pop.settings?.address || null
+    const lineFromColumns = [pop.street_address, pop.city, pop.state, pop.country]
+      .filter(Boolean)
+      .join(', ')
+    const address =
+      lineFromColumns || (pop.settings?.address as string | undefined) || null
+
+    const base = {
+      id: pop.id,
+      name: pop.name,
+      imageUrl: pop.image_url,
+      address,
+      country: pop.country ?? null,
+      state: pop.state ?? null,
+      city: pop.city ?? null,
+      streetAddress: pop.street_address ?? null,
+      postalCode: pop.postal_code ?? null,
+      phone: pop.phone ?? null,
+      backgroundImageUrl: pop.background_image_url ?? null,
+      invoiceLogoUrl: pop.invoice_logo_url ?? null,
+      settings: pop.settings || {}
+    }
+
+    if (options?.includeOwnerUserId) {
+      return {
+        success: true,
+        pop: {
+          ...base,
+          ownerUserId: (pop.owner_user_id as string | null) ?? null
+        }
+      }
+    }
 
     return {
       success: true,
-      pop: {
-        id: pop.id,
-        name: pop.name,
-        imageUrl: pop.image_url,
-        address: address,
-        settings: pop.settings || {}
-      }
+      pop: base
     }
-  } catch (error: any) {
-    console.error('Error getting POP:', error)
+  } catch {
     return {
       success: false,
       error: 'Error inesperado al obtener datos del POP'
@@ -164,10 +186,7 @@ export async function getPopById(popId: string) {
   }
 }
 
-/**
- * Valida que un POP esté activo antes de realizar operaciones
- */
-export async function validatePopAccess(popId: string): Promise<{
+export async function validatePopAccess (popId: string): Promise<{
   hasAccess: boolean
   isActive: boolean
   error?: string
@@ -177,7 +196,6 @@ export async function validatePopAccess(popId: string): Promise<{
     const cookieStore = await cookies()
     const supabase = createServerActionClient({ cookies: () => cookieStore })
 
-    // Verificar acceso al POP
     const { data: hasAccess, error: accessError } = await supabase.rpc(
       'user_has_pop_access',
       {
@@ -194,7 +212,6 @@ export async function validatePopAccess(popId: string): Promise<{
       }
     }
 
-    // Verificar si el POP está activo
     const active = await isPopActive(popId)
 
     if (!active) {
@@ -210,8 +227,7 @@ export async function validatePopAccess(popId: string): Promise<{
       hasAccess: true,
       isActive: true
     }
-  } catch (error: any) {
-    console.error('Error validating POP access:', error)
+  } catch {
     return {
       hasAccess: false,
       isActive: false,
@@ -219,4 +235,3 @@ export async function validatePopAccess(popId: string): Promise<{
     }
   }
 }
-

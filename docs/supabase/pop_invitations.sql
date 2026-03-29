@@ -1,0 +1,11 @@
+-- Invitaciones a un POP (correo + rol). Migración aplicada en proyecto vinculado: `pop_invitations_hr`.
+-- Solo el owner del POP gestiona filas vía RLS. La aceptación usa la RPC `accept_pop_invitation` (ver hr_invite_rpc_no_service_role.sql).
+--
+-- RPC (migración `hr_invite_rpc_no_service_role`):
+--   lookup_auth_user_id_for_pop_owner_invite(pop_id, email) — owner busca auth.users.id
+--   accept_pop_invitation(token) — invitado acepta con sesión normal (sin service role en Next)
+--
+-- Variables de entorno (Next.js, solo servidor):
+--   RESEND_API_KEY (opcional) — envío de correo de invitación
+--   RESEND_FROM — remitente (ej. Rootsy <notificaciones@tudominio.com>)
+--   NEXT_PUBLIC_APP_URL — base para enlaces en el correo (ej. https://app.rootsy.com)

@@ -3,8 +3,8 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET () {
-  const cookieStore = cookies() // 🔹 Obtiene las cookies de forma segura
-  const supabase = createServerActionClient({ cookies: () => cookieStore }) // 🔹 Usa `createServerActionClient`
+  const cookieStore = cookies()
+  const supabase = createServerActionClient({ cookies: () => cookieStore })
 
   const {
     data: { user },

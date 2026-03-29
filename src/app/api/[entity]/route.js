@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, addDoc } from 'firebase/firestore'
 
-// Configuración de Firebase
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -15,10 +14,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 
-// POST: Crear un nuevo "Pop"
 export async function POST (req) {
   try {
-    const data = await req.json() // Datos enviados desde el formulario
+    const data = await req.json()
     const docRef = await addDoc(collection(db, 'pop'), data)
 
     return NextResponse.json(

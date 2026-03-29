@@ -12,7 +12,7 @@ export const withGuestAuth = Component => {
 
     useEffect(() => {
       if (!loading && user) {
-        router.push('/profile')
+        router.push('/home')
       }
     }, [user, loading, router])
 

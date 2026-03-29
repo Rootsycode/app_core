@@ -16,41 +16,33 @@ export default function Page () {
   useEffect(() => {
     if (!params.entity) return
 
-    // Importar dinámicamente el schema según el parámetro de la URL
     import(`../../../../domain/global/${params.entity}.schema`)
       .then(mod => {
-        console.log('sí entró!!!')
         setSchema(mod.schema)
         setUiSchema(mod.uiSchema)
       })
-      .catch(err => {
-        console.error('🚨 Error cargando el schema:', err)
+      .catch(() => {
         setSchema(null)
         setUiSchema(null)
       })
   }, [params.entity])
 
   const handleSubmit = async ({ formData }) => {
-    console.log('entrando....')
     try {
-      console.log('al try....')
       const response = await fetch('/api/pop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
-      alert('no llego')
 
       const result = await response.json()
-      console.log('📩 Respuesta del servidor:', result)
 
       if (response.ok) {
         alert('✅ Entidad creada correctamente')
       } else {
         alert('❌ Error al crear la entidad: ' + result.error)
       }
-    } catch (error) {
-      console.error('🚨 Error en la solicitud:', error)
+    } catch {
       alert('❌ Error inesperado')
     }
   }

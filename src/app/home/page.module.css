@@ -1,0 +1,107 @@
+.container {
+  display: grid;
+  grid-template-rows: 104px auto 85px;
+  grid-template-columns: 1fr;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 720px;
+  max-height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+  background-color: var(--greyscale-600);
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--greyscale-500);
+}
+
+.logo {
+  height: 32px;
+  width: auto;
+}
+
+.buttons_right {
+  display: flex;
+  align-items: center;
+
+  & :not(:last-child) {
+    margin-right: 12px;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 120px;
+}
+
+.pops {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-x: auto;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+.pops ul {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  user-select: none;
+  list-style-type: none;
+  padding: 0 24px;
+}
+
+.pops ul li:not(:last-child) {
+  margin-right: 24px;
+}
+
+.footer {
+  display: flex;
+  height: 100%;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.footer_container {
+  display: flex;
+  align-items: center;
+}
+
+/* Skeleton styles - mismo color y animación que ButtonPop skeleton */
+.skeleton {
+  background: #2c2e38;
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  animation: skeletonPulse 1.5s infinite;
+}
+
+@keyframes skeletonPulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}

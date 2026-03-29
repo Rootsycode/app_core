@@ -5,7 +5,6 @@ import { cookies } from 'next/headers'
 import { requireAuthenticatedUser } from '@/lib/authHelpers'
 import { getPopSubscriptionInfo } from '@/lib/subscriptions'
 
-/** Orden: primero el plan que pediste; si no hay fila en DB, probamos `starter` (nombre del doc). */
 const PAID_PLAN_CANDIDATES = ['started', 'starter'] as const
 
 export type SubscribePageData =
@@ -108,7 +107,6 @@ export async function simulateActivatePopSubscription (
       .maybeSingle()
 
     if (subFetchError) {
-      console.error('pop_subscriptions select:', subFetchError)
       return { success: false, error: subFetchError.message }
     }
 
@@ -134,7 +132,6 @@ export async function simulateActivatePopSubscription (
         .maybeSingle()
 
       if (planErr) {
-        console.error('subscription_plans lookup:', planErr)
         return {
           success: false,
           error:
@@ -178,7 +175,6 @@ export async function simulateActivatePopSubscription (
       .eq('pop_id', popId)
 
     if (subUpdateError) {
-      console.error('pop_subscriptions update:', subUpdateError)
       if (
         subUpdateError.code === '42501' ||
         subUpdateError.message?.toLowerCase().includes('policy')
@@ -199,7 +195,6 @@ export async function simulateActivatePopSubscription (
       .eq('owner_user_id', user.uid)
 
     if (popUpdateError) {
-      console.error('pops update:', popUpdateError)
       if (
         popUpdateError.code === '42501' ||
         popUpdateError.message?.toLowerCase().includes('policy')

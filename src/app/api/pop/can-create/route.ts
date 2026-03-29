@@ -14,7 +14,6 @@ export async function GET() {
     })
 
     if (error) {
-      console.error('Error checking if user can create POP:', error)
       return NextResponse.json(
         { canCreate: false, reason: 'Error al verificar límite de POPs' },
         { status: 200 }
@@ -22,7 +21,6 @@ export async function GET() {
     }
 
     if (!data) {
-      // Verificar cuántos POPs tiene el usuario
       const { data: userPops } = await supabase
         .from('pops')
         .select('id')
@@ -37,9 +35,9 @@ export async function GET() {
     }
 
     return NextResponse.json({ canCreate: data === true })
-  } catch (error: any) {
-    console.error('Error checking if user can create POP:', error)
-    if (error?.message?.includes('authenticated') || error?.message?.includes('session')) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : ''
+    if (msg.includes('authenticated') || msg.includes('session')) {
       return NextResponse.json(
         { canCreate: false, reason: 'Debes iniciar sesión para crear un POP' },
         { status: 200 }

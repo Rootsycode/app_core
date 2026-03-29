@@ -32,8 +32,7 @@ const CreatePopPage = () => {
           const data = await response.json()
           setBusinessTypes(data || [])
         }
-      } catch (err) {
-        console.error('Error loading business types:', err)
+      } catch {
       } finally {
         setLoadingTypes(false)
       }
@@ -132,7 +131,7 @@ const CreatePopPage = () => {
       if (result.success) {
         setSuccess(true)
         setTimeout(() => {
-          router.push('/profile')
+          router.push('/home')
         }, 2000)
       } else {
         setError(result.details || result.error || 'Error al crear el punto de venta')
@@ -188,7 +187,7 @@ const CreatePopPage = () => {
             <nav className={styles.panelNav} aria-label='Navegación'>
               <Link
                 className={styles.backLink}
-                onPress={() => router.push('/profile')}
+                onPress={() => router.push('/home')}
               >
                 ← Volver al perfil
               </Link>

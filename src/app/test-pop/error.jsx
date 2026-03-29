@@ -1,15 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
 import { Body, ButtonRs, Title } from 'rootsy-feparts'
 import styles from './page.module.css'
 
-export default function Error({ error, reset }) {
-  useEffect(() => {
-    // Log the error to an error reporting service
-    console.error('Test POP page error:', error)
-  }, [error])
-
+export default function Error ({ error, reset }) {
   return (
     <div className={styles.container}>
       <Title>Algo salió mal</Title>
@@ -22,4 +16,3 @@ export default function Error({ error, reset }) {
     </div>
   )
 }
-

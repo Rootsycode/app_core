@@ -1,6 +1,5 @@
 'use client'
 
-import classNames from 'classnames'
 import { ButtonThumb, Title, Body } from 'rootsy-feparts'
 import styles from './SectionHeader.module.css'
 
@@ -24,19 +23,16 @@ export const SectionHeader = ({
   buttonsLeft,
   buttonsRight
 }: SectionHeaderProps) => {
-  const classes = classNames(styles.container, className)
+  const classes = [styles.container, className].filter(Boolean).join(' ')
 
   return (
     <header className={classes}>
-      {/* column 1 */}
       <div className={styles.column}>{buttonsLeft || null}</div>
 
-      {/* column 2 */}
       <Title component='h1' size='sm'>
         {sectionName}
       </Title>
 
-      {/* column 3 */}
       <div className={styles.column}>
         {buttonsRight ? <div className={styles.buttons_group}>{buttonsRight}</div> : null}
 

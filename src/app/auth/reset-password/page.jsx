@@ -20,7 +20,6 @@ const ResetPasswordForm = ({ router }) => {
   const isSubmittingRef = useRef(false)
   const supabase = createClientComponentClient()
 
-  // Validar un campo individual en tiempo real
   const validateField = (fieldName, value) => {
     let error = ''
     
@@ -32,17 +31,13 @@ const ResetPasswordForm = ({ router }) => {
       }
     }
     
-    // Solo actualizar el error si el campo tiene un error o si estaba en error y ahora es válido
     setFieldErrors(prev => {
-      // Si el campo tenía un error y ahora es válido, limpiarlo
       if (prev[fieldName] && !error) {
         return { ...prev, [fieldName]: '' }
       }
-      // Si el campo tiene un error, actualizarlo
       if (error) {
         return { ...prev, [fieldName]: error }
       }
-      // Si no hay error y no había error antes, no hacer nada
       return prev
     })
   }
@@ -73,7 +68,6 @@ const ResetPasswordForm = ({ router }) => {
     
     const email = e.target.email?.value?.trim() || ''
     
-    // Validar formulario antes de enviar
     const isValid = validateForm(email)
     if (!isValid) {
       setTimeout(() => {
@@ -99,10 +93,8 @@ const ResetPasswordForm = ({ router }) => {
     setFieldErrors({ email: '' })
 
     try {
-      // Asegurarse de que el email esté en minúsculas y sin espacios
       const cleanEmail = email.trim().toLowerCase()
       
-      // Obtener la URL base para el redirect
       const origin = typeof window !== 'undefined' ? window.location.origin : ''
       
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
@@ -113,7 +105,6 @@ const ResetPasswordForm = ({ router }) => {
         throw resetError
       }
 
-      // Éxito: mostrar mensaje de confirmación
       setIsSuccess(true)
       setIsLoading(false)
     } catch (error) {
@@ -138,7 +129,6 @@ const ResetPasswordForm = ({ router }) => {
         onInput={(e) => validateField('email', e.target.value)}
       />
 
-      {/* Mostrar mensaje de éxito o error */}
       {isSuccess && (
         <Body 
           size='sm' 

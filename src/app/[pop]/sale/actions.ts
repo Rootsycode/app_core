@@ -35,9 +35,6 @@ function mapArticleRow (row: Record<string, unknown>): SaleArticleRow {
   }
 }
 
-/**
- * Categorías visibles en ventas (`visible = true`) para el POP.
- */
 export async function getSaleCategories (popId: string) {
   try {
     const access = await validatePopAccess(popId)

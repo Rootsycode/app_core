@@ -6,10 +6,9 @@ import {
   Utility
 } from 'rootsy-feparts'
 
-// Input de texto personalizado
 const CustomTextWidget = (props) => {
-  const errorMessage = props.rawErrors?.[0] || ""; // Captura el primer error si existe
-  const hasError = !!errorMessage; // Convierte en booleano
+  const errorMessage = props.rawErrors?.[0] || ""
+  const hasError = !!errorMessage
 
   return (
     <TextField
@@ -19,15 +18,14 @@ const CustomTextWidget = (props) => {
       placeholder={props.placeholder || ""}
       description={props.description}
       isRequired={props.required}
-      validationState={hasError ? "invalid" : "valid"} // Resalta el input en rojo
-      errorMessage={hasError ? errorMessage : undefined} // Muestra el error solo si existe
+      validationState={hasError ? "invalid" : "valid"}
+      errorMessage={hasError ? errorMessage : undefined}
     />
   );
 };
 
 
 
-// Campo de número personalizado
 const CustomNumberWidget = (props) => {
   return (
     <NumberField
@@ -40,7 +38,6 @@ const CustomNumberWidget = (props) => {
   )
 }
 
-// Checkbox personalizado
 const CustomCheckboxWidget = (props) => {
   return (
     <>
@@ -54,7 +51,6 @@ const CustomCheckboxWidget = (props) => {
   )
 }
 
-// Select personalizado
 const CustomSelectWidget = (props) => {
   return (
     <Select
@@ -69,7 +65,6 @@ const CustomSelectWidget = (props) => {
   )
 }
 
-// TextArea personalizado (para strings largas)
 const CustomTextAreaWidget = (props) => {
   return (
     <TextField
@@ -79,12 +74,11 @@ const CustomTextAreaWidget = (props) => {
       onChange={e => props.onChange(e)}
       description={props.description}
       isRequired={props.required}
-      multiline // Habilita textarea en react-aria
+      multiline
     />
   )
 }
 
-// Objeto con todos los widgets personalizados
 export const CustomWidgets = {
   TextWidget: CustomTextWidget,
   NumberWidget: CustomNumberWidget,

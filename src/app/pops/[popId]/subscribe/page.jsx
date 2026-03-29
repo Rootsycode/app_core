@@ -57,7 +57,7 @@ export default function PopSubscribePage () {
     }
     setDone(true)
     setTimeout(() => {
-      router.push('/profile')
+      router.push('/home')
     }, 1600)
   }
 
@@ -75,7 +75,7 @@ export default function PopSubscribePage () {
     return (
       <div className={styles.page}>
         <div className={styles.inner}>
-          <Link className={styles.back} onPress={() => router.push('/profile')}>
+          <Link className={styles.back} onPress={() => router.push('/home')}>
             ← Volver al perfil
           </Link>
           <div className={styles.panel}>
@@ -105,7 +105,7 @@ export default function PopSubscribePage () {
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
-        <Link className={styles.back} onPress={() => router.push('/profile')}>
+        <Link className={styles.back} onPress={() => router.push('/home')}>
           ← Volver al perfil
         </Link>
 

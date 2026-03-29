@@ -21,13 +21,11 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
   const isSubmittingRef = useRef(false)
   const supabase = createClientComponentClient()
 
-  // Verificar el token_hash cuando el componente se monta
   useEffect(() => {
     const verifyToken = async () => {
       const token_hash = searchParams?.get('token_hash')
       const type = searchParams?.get('type')
 
-      // Si hay token_hash en la URL, verificar el token para establecer la sesión (PKCE flow)
       if (token_hash && type) {
         try {
           const { error: verifyError } = await supabase.auth.verifyOtp({
@@ -40,15 +38,12 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
             setIsVerifyingToken(false)
             return
           }
-          // Si no hay error, la sesión se estableció correctamente
         } catch (err) {
           setError('Error al verificar el link de recuperación. Por favor, solicita uno nuevo.')
           setIsVerifyingToken(false)
           return
         }
       } else {
-        // Si no hay token_hash, verificar si hay una sesión activa (implicit flow)
-        // Esperar un momento para que las cookies se establezcan si vienen del email
         await new Promise(resolve => setTimeout(resolve, 500))
         
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -64,7 +59,6 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
     verifyToken()
   }, [searchParams, supabase])
 
-  // Validar un campo individual en tiempo real
   const validateField = (fieldName, value, confirmValue = '') => {
     let error = ''
     
@@ -88,17 +82,13 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
       }
     }
     
-    // Solo actualizar el error si el campo tiene un error o si estaba en error y ahora es válido
     setFieldErrors(prev => {
-      // Si el campo tenía un error y ahora es válido, limpiarlo
       if (prev[fieldName] && !error) {
         return { ...prev, [fieldName]: '' }
       }
-      // Si el campo tiene un error, actualizarlo
       if (error) {
         return { ...prev, [fieldName]: error }
       }
-      // Si no hay error y no había error antes, no hacer nada
       return prev
     })
   }
@@ -148,7 +138,6 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
     const password = e.target.password?.value || ''
     const confirmPassword = e.target.confirmPassword?.value || ''
     
-    // Validar formulario antes de enviar
     const isValid = validateForm(password, confirmPassword)
     if (!isValid) {
       setTimeout(() => {
@@ -182,11 +171,9 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
         throw updateError
       }
 
-      // Éxito: mostrar mensaje y redirigir después de un momento
       setIsSuccess(true)
       setIsLoading(false)
       
-      // Redirigir al login después de 2 segundos
       setTimeout(() => {
         router.push('/auth/login')
       }, 2000)
@@ -198,7 +185,6 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
     }
   }
 
-  // Mostrar loading mientras se verifica el token
   if (isVerifyingToken) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -222,7 +208,6 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
           const password = e.target.value
           const confirmPassword = document.querySelector('[name="confirmPassword"]')?.value || ''
           validateField('password', password)
-          // Si hay confirmPassword, validarlo también
           if (confirmPassword) {
             validateField('confirmPassword', confirmPassword, password)
           }
@@ -243,7 +228,6 @@ const UpdatePasswordForm = ({ router, searchParams }) => {
         }}
       />
 
-      {/* Mostrar mensaje de éxito o error */}
       {isSuccess && (
         <Body 
           size='sm' 

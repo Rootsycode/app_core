@@ -1,14 +1,28 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
+
+const remotePatterns: NonNullable<NextConfig['images']>['remotePatterns'] = []
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+if (supabaseUrl) {
+  try {
+    const host = new URL(supabaseUrl).hostname
+    remotePatterns.push({
+      protocol: 'https',
+      hostname: host,
+      pathname: '/storage/v1/object/public/**'
+    })
+  } catch {
+  }
+}
 
 const nextConfig: NextConfig = {
-  // En dev, React Strict Mode monta/desmonta/remonta los client components y vuelve a ejecutar los
-  // useEffect: cada server action disparada ahí corre dos veces (doble pegada + logs duplicados).
-  // En producción el build no aplica ese doble montaje; si querés de nuevo la ayuda de Strict Mode
-  // en local, poné `true` y usá deduplicación por request donde haga falta.
+  async redirects () {
+    return [{ source: '/inicio', destination: '/home', permanent: true }]
+  },
   reactStrictMode: false,
-  // Necesario al consumir rootsy-feparts desde file:../ o workspaces (código ya transpilado en dist,
-  // pero Next sigue recomendando explicitar paquetes internos del monorepo).
-  transpilePackages: ["rootsy-feparts"],
-};
+  transpilePackages: ['rootsy-feparts'],
+  ...(remotePatterns.length
+    ? { images: { remotePatterns } }
+    : {})
+}
 
-export default nextConfig;
+export default nextConfig

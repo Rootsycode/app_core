@@ -145,7 +145,7 @@ export const MENU = [
     {
       label: 'RRHH',
       img: '/assets/menu/rrhh.svg',
-      link: 'section'
+      link: 'hr'
     },
     {
       label: 'Impresoras',
@@ -155,7 +155,7 @@ export const MENU = [
     {
       label: 'Ajustes',
       img: '/assets/menu/ajustes.svg',
-      link: 'ajustes'
+      link: 'settings'
     }
   ]
 ]

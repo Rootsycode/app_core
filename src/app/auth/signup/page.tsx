@@ -13,7 +13,7 @@ import styles from './page.module.css'
 
 const RegisterWithEmail = ({ router }) => {
   const [error, setError] = useState('')
-  const [isSuccess, setIsSuccess] = useState(false) // Para distinguir mensajes de éxito
+  const [isSuccess, setIsSuccess] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({
     name: '',
     surname: '',
@@ -24,7 +24,6 @@ const RegisterWithEmail = ({ router }) => {
   const isSubmittingRef = useRef(false)
   const supabase = createClientComponentClient()
 
-  // Validar un campo individual en tiempo real
   const validateField = (fieldName, value) => {
     let error = ''
     
@@ -60,17 +59,13 @@ const RegisterWithEmail = ({ router }) => {
       }
     }
     
-    // Solo actualizar el error si el campo tiene un error o si estaba en error y ahora es válido
     setFieldErrors(prev => {
-      // Si el campo tenía un error y ahora es válido, limpiarlo
       if (prev[fieldName] && !error) {
         return { ...prev, [fieldName]: '' }
       }
-      // Si el campo tiene un error, actualizarlo
       if (error) {
         return { ...prev, [fieldName]: error }
       }
-      // Si no hay error y no había error antes, no hacer nada
       return prev
     })
   }
@@ -84,7 +79,6 @@ const RegisterWithEmail = ({ router }) => {
     }
     let isValid = true
 
-    // Validar nombre
     if (!name || name.trim() === '') {
       errors.name = 'El nombre es requerido'
       isValid = false
@@ -93,7 +87,6 @@ const RegisterWithEmail = ({ router }) => {
       isValid = false
     }
 
-    // Validar apellido
     if (!surname || surname.trim() === '') {
       errors.surname = 'El apellido es requerido'
       isValid = false
@@ -102,7 +95,6 @@ const RegisterWithEmail = ({ router }) => {
       isValid = false
     }
 
-    // Validar email
     if (!email || email.trim() === '') {
       errors.email = 'El correo electrónico es requerido'
       isValid = false
@@ -111,7 +103,6 @@ const RegisterWithEmail = ({ router }) => {
       isValid = false
     }
 
-    // Validar contraseña
     if (!password || password === '') {
       errors.password = 'La contraseña es requerida'
       isValid = false
@@ -136,9 +127,8 @@ const RegisterWithEmail = ({ router }) => {
   const handleRegister = async e => {
     e.preventDefault()
     setError('')
-    setIsSuccess(false) // Limpiar estado de éxito
+    setIsSuccess(false)
     
-    // Marcar que estamos en proceso de validación
     isSubmittingRef.current = true
     
     const email = e.target.email?.value?.trim() || ''
@@ -146,15 +136,10 @@ const RegisterWithEmail = ({ router }) => {
     const firstName = e.target.name?.value?.trim() || ''
     const lastName = e.target.surname?.value?.trim() || ''
 
-    // Validar formulario antes de enviar
-    // validateForm establece los errores en el estado
     const isValid = validateForm(firstName, lastName, email, password)
     if (!isValid) {
-      // Los errores ya se establecieron en validateForm
-      // Esperar un momento para que React actualice el estado
       setTimeout(() => {
         isSubmittingRef.current = false
-        // Usar los errores recién establecidos
         setFieldErrors(currentErrors => {
           const firstErrorField = Object.keys(currentErrors).find(key => currentErrors[key])
           if (firstErrorField) {
@@ -172,18 +157,14 @@ const RegisterWithEmail = ({ router }) => {
       return
     }
     
-    // Si la validación pasa, permitir que onInput valide campos
     isSubmittingRef.current = false
 
-    // Si la validación pasa, limpiar errores y proceder
     setIsLoading(true)
     setFieldErrors({ name: '', surname: '', email: '', password: '' })
 
     try {
-      // Asegurarse de que el email esté en minúsculas y sin espacios
       const cleanEmail = email.trim().toLowerCase()
       
-      // Intentar registrar usuario en Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: cleanEmail,
         password,
@@ -195,15 +176,9 @@ const RegisterWithEmail = ({ router }) => {
         }
       })
 
-      // Verificar si hay error PERO también verificar si el usuario se creó
-      // A veces Supabase devuelve un error pero el usuario se registra correctamente
       if (authError) {
-        // Si el usuario se creó a pesar del error, ignorar el error y continuar
         if (authData?.user) {
-          console.log('Usuario creado exitosamente a pesar del error de Supabase:', authError.message)
-          // Continuar con el flujo normal, no retornar aquí
         } else {
-          // Solo mostrar error si NO se creó el usuario
           const errorMsg = authError.message?.toLowerCase() || ''
           if (errorMsg.includes('already registered') || 
               errorMsg.includes('user already registered') ||
@@ -211,9 +186,7 @@ const RegisterWithEmail = ({ router }) => {
               errorMsg.includes('email address is already registered')) {
             setError('Este correo electrónico ya está registrado. Por favor, inicia sesión.')
           } else if (errorMsg.includes('invalid') && errorMsg.includes('email')) {
-            // Si Supabase dice que el email es inválido, verificar si es un problema de formato
             if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-              // El email tiene formato válido según nuestra validación
               setError('Hubo un problema al registrar el correo electrónico. Por favor, intenta nuevamente.')
             } else {
               setError('Por favor ingresa un correo electrónico válido')
@@ -226,77 +199,54 @@ const RegisterWithEmail = ({ router }) => {
         }
       }
 
-      // Verificar que se haya creado el usuario
       if (!authData?.user) {
         setError('Este correo electrónico ya está registrado. Por favor, inicia sesión.')
         setIsLoading(false)
         return
       }
 
-      // Si NO hay sesión, significa que el usuario ya existe o necesita confirmar email
       if (!authData.session) {
-        // PRIMERO: Verificar si el usuario tiene email_confirmed_at (ya está confirmado y existe)
-        // Esta es la señal más confiable de que el usuario ya existe
         if (authData.user.email_confirmed_at) {
           setError('Este correo electrónico ya está registrado. Por favor, inicia sesión.')
           setIsLoading(false)
           return
         }
 
-        // SEGUNDO: Verificar si el usuario ya existe en la tabla users
         const { data: existingUser, error: checkError } = await supabase
           .from('users')
           .select('id')
           .eq('id', authData.user.id)
           .maybeSingle()
 
-        // Si el usuario ya existe en la tabla users, definitivamente ya estaba registrado
         if (existingUser && !checkError) {
           setError('Este correo electrónico ya está registrado. Por favor, inicia sesión.')
           setIsLoading(false)
           return
         }
 
-        // TERCERO: Verificar la fecha de creación
-        // Si el usuario fue creado hace más de 10 segundos, probablemente ya existía
-        // (un usuario nuevo se crea instantáneamente, así que si pasó mucho tiempo, es porque ya existía)
         const userCreatedAt = new Date(authData.user.created_at)
         const now = new Date()
-        const timeDiff = (now - userCreatedAt) / 1000 // en segundos
+        const timeDiff = (now - userCreatedAt) / 1000
 
-        // Si el usuario fue creado hace más de 10 segundos, probablemente ya existía
-        // Esto es un margen de seguridad para evitar falsos positivos
         if (timeDiff > 10) {
           setError('Este correo electrónico ya está registrado. Por favor, inicia sesión.')
           setIsLoading(false)
           return
         }
 
-        // Si llegamos aquí y el usuario fue creado hace menos de 10 segundos,
-        // es probablemente un usuario nuevo que necesita confirmar email
-        // PERO: si Supabase no requiere confirmación de email, esto no debería pasar
-        // En ese caso, debería haber una sesión
         
-        // Verificar si Supabase requiere confirmación de email
-        // Si no requiere confirmación y no hay sesión, el usuario probablemente ya existe
-        // Por seguridad, asumir que es un usuario nuevo solo si fue creado hace menos de 2 segundos
         if (timeDiff > 2) {
-          // Usuario creado hace más de 2 segundos sin sesión ni confirmación
-          // Probablemente ya existía
           setError('Este correo electrónico ya está registrado. Por favor, inicia sesión.')
           setIsLoading(false)
           return
         }
 
-        // Si llegamos aquí, es un usuario nuevo que necesita confirmar email
-        // Solo mostrar este mensaje si realmente es un usuario nuevo (creado hace menos de 2 segundos)
         setError('Por favor, revisa tu correo electrónico para confirmar tu cuenta.')
-        setIsSuccess(true) // Marcar como mensaje de éxito
+        setIsSuccess(true)
         setIsLoading(false)
         return
       }
 
-      // Crear perfil del usuario en la tabla users
       const { error: profileError } = await supabase
         .from('users')
         .insert({
@@ -306,24 +256,19 @@ const RegisterWithEmail = ({ router }) => {
         })
 
       if (profileError) {
-        // Si el perfil ya existe, no es un error crítico
-        if (profileError.code === '23505') { // Violación de constraint único
-          console.warn('El perfil del usuario ya existe')
+        if (profileError.code === '23505') {
         } else {
-          console.error('Error creating user profile:', profileError)
           setError('Usuario creado pero hubo un error al crear el perfil. Por favor, inicia sesión.')
           setIsLoading(false)
           return
         }
       }
 
-      // Esperar un momento para que las cookies se establezcan
       await new Promise(resolve => setTimeout(resolve, 100))
-      router.push('/profile')
+      router.push('/home')
       router.refresh()
       setIsLoading(false)
     } catch (error) {
-      // Manejar errores inesperados
       const errorMessage = error?.message || 'Error al registrar usuario'
       if (errorMessage.includes('already registered') || 
           errorMessage.includes('already exists')) {
@@ -384,7 +329,6 @@ const RegisterWithEmail = ({ router }) => {
         onInput={(e) => validateField('password', e.target.value)}
       />
 
-      {/* Mostrar errores del servidor (email duplicado, errores de red, etc.) o mensajes de éxito */}
       {error && (
         <Body 
           size='sm' 
@@ -406,7 +350,6 @@ const RegisterWithEmail = ({ router }) => {
   )
 }
 
-// Componente de registro con Google
 const RegisterWithGoogle = () => {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -417,13 +360,12 @@ const RegisterWithGoogle = () => {
     setError(null)
     
     try {
-      // Obtener la URL base (funciona tanto en desarrollo como en producción)
       const origin = typeof window !== 'undefined' ? window.location.origin : ''
       
       const { data, error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/auth/callback?next=/profile`
+          redirectTo: `${origin}/auth/callback?next=/home`
         }
       })
       
@@ -431,8 +373,6 @@ const RegisterWithGoogle = () => {
         throw authError
       }
       
-      // signInWithOAuth redirige automáticamente, no necesitamos hacer nada más aquí
-      // El callback route manejará la redirección a /profile
     } catch (error) {
       setError(error.message || 'Error al registrar con Google')
       setIsLoading(false)

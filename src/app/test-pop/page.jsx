@@ -15,12 +15,10 @@ const TestPopPage = () => {
   const [businessTypes, setBusinessTypes] = useState([])
   const [loadingData, setLoadingData] = useState(true)
 
-  // Cargar datos al montar
   useEffect(() => {
     const loadData = async () => {
       setLoadingData(true)
       try {
-        // Cargar planes y tipos de negocio usando fetch directo
         const [plansRes, businessTypesRes] = await Promise.all([
           fetch('/api/subscription/plans').catch(() => null),
           fetch('/api/subscription/business-types').catch(() => null)
@@ -36,7 +34,6 @@ const TestPopPage = () => {
           setBusinessTypes(businessTypesData || [])
         }
 
-        // Verificar si puede crear POP
         try {
           const canCreateRes = await fetch('/api/pop/can-create')
           if (canCreateRes.ok) {
@@ -48,8 +45,7 @@ const TestPopPage = () => {
         } catch {
           setCanCreate({ canCreate: false, reason: 'Error al verificar' })
         }
-      } catch (error) {
-        console.error('Error loading data:', error)
+      } catch {
         setCanCreate({ canCreate: false, reason: 'Error al cargar datos' })
       } finally {
         setLoadingData(false)

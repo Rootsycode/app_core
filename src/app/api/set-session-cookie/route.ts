@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'idToken is required' }, { status: 400 });
     }
 
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 días
+    const expiresIn = 60 * 60 * 24 * 5 * 1000;
     const sessionCookie = await firebaseAuth.createSessionCookie(idToken, { expiresIn });
 
     const response = NextResponse.json({ message: 'Session cookie set successfully' });
@@ -25,8 +25,7 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-  } catch (error) {
-    console.error('Error creating session cookie:', error);
+  } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 }

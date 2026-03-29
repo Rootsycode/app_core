@@ -30,8 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           data: { session }
         } = await supabase.auth.getSession()
         setUser(session?.user ?? null)
-      } catch (error) {
-        console.warn('Error al obtener sesión de Supabase:', error)
+      } catch {
         setUser(null)
       } finally {
         setLoading(false)
@@ -54,8 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logOut = async () => {
     try {
       await supabase.auth.signOut()
-    } catch (error) {
-      console.warn('Error al cerrar sesión:', error)
+    } catch {
     }
   }
 

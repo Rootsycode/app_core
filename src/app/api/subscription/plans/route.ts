@@ -14,13 +14,11 @@ export async function GET() {
       .order('base_price_monthly', { ascending: true })
 
     if (error) {
-      console.error('Error getting subscription plans:', error)
       return NextResponse.json([], { status: 200 })
     }
 
     return NextResponse.json(data || [])
-  } catch (error) {
-    console.error('Error getting subscription plans:', error)
+  } catch {
     return NextResponse.json([], { status: 200 })
   }
 }

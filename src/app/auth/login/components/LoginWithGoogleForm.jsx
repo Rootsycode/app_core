@@ -16,13 +16,12 @@ const LoginWithGoogleForm = ({ router }) => {
     setError(null)
     
     try {
-      // Obtener la URL base (funciona tanto en desarrollo como en producción)
       const origin = typeof window !== 'undefined' ? window.location.origin : ''
       
       const { data, error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/auth/callback?next=/profile`
+          redirectTo: `${origin}/auth/callback?next=/home`
         }
       })
       
@@ -30,8 +29,6 @@ const LoginWithGoogleForm = ({ router }) => {
         throw authError
       }
       
-      // signInWithOAuth redirige automáticamente, no necesitamos hacer nada más aquí
-      // El callback route manejará la redirección a /profile
     } catch (error) {
       setError(error.message || 'Error al iniciar sesión con Google')
       setIsLoading(false)
