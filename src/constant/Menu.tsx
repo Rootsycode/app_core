@@ -26,9 +26,9 @@ export const MENU = [
       link: 'section'
     },
     {
-      label: 'Inventario',
+      label: 'Artículos',
       img: '/assets/menu/stock.svg',
-      link: 'inventory'
+      link: 'articles'
     },
     {
       label: 'Clientes',

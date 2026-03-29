@@ -1,7 +1,9 @@
 'use server'
 
 import { requireAuthenticatedUser } from '@/lib/authHelpers'
+import { POP_PERMS, permissionKeysInclude } from '@/lib/popPermissionConstants'
 import { getPopById, validatePopAccess } from '@/lib/popHelpers'
+import { loadPopPermissionsSnapshot } from '@/lib/popPermissionsServer'
 import { createClient } from '@/utils/supabase/server'
 import { getAppBaseUrl } from '@/lib/appUrl'
 
@@ -82,7 +84,6 @@ async function isPopOwner (
   return false
 }
 
-/** Convierte respuestas JSON de Resend en texto legible (español) para el banner de RRHH. */
 function formatResendApiError (body: string): string {
   const raw = body.trim()
   try {
@@ -148,6 +149,7 @@ export async function getPopHrDashboard (popId: string): Promise<
       popName: string
       isOwner: boolean
       canManageInvites: boolean
+      permissionKeys: string[]
       roles: PopRoleRow[]
       members: MemberRow[]
       pendingInvites: PendingInviteRow[]
@@ -168,6 +170,21 @@ export async function getPopHrDashboard (popId: string): Promise<
         success: false,
         error: access.error || 'POP inactivo',
         redirect: '/home'
+      }
+    }
+
+    const permSnapshot = await loadPopPermissionsSnapshot(popId)
+    if (
+      !permissionKeysInclude(
+        permSnapshot.keys,
+        POP_PERMS.HR_READ.resource,
+        POP_PERMS.HR_READ.action
+      )
+    ) {
+      return {
+        success: false,
+        error: 'No tenés permiso para ver Recursos humanos en este punto de venta.',
+        redirect: `/${popId}/menu`
       }
     }
 
@@ -223,7 +240,7 @@ export async function getPopHrDashboard (popId: string): Promise<
     }
 
     const userIds = [...new Set((uprRows || []).map((r) => r.user_id))]
-    let profileMap: Record<
+    const profileMap: Record<
       string,
       { first_name: string; last_name: string; image_url: string | null }
     > = {}
@@ -331,6 +348,7 @@ export async function getPopHrDashboard (popId: string): Promise<
       popName: popRes.pop.name,
       isOwner: owner,
       canManageInvites: owner,
+      permissionKeys: permSnapshot.keys,
       roles,
       members,
       pendingInvites
@@ -352,7 +370,6 @@ export async function inviteUserToPop (
       emailSent: boolean
       inviteUrl: string
       emailError?: string
-      /** `true` si hay `RESEND_API_KEY` en el servidor (el envío puede fallar igual). */
       resendConfigured: boolean
     }
   | { success: false; error: string }

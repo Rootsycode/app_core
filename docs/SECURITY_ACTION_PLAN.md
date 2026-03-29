@@ -2,6 +2,12 @@
 
 Objetivo: **reglas claras y repetibles** para todos los flujos del SaaS, con **el mínimo de idas a base razonable**, sin sacrificar la frontera de seguridad en Postgres.
 
+**Estado de etapas**
+
+- **Etapa 1 (código):** implementado — `popPermissionsServer.ts`, `popPermissionConstants.ts`, menú y RRHH usan el mismo snapshot; ver `FEATURE_DEVELOPMENT_GUIDE.md`.
+- **Etapa 2 (inventario):** `DATABASE_RLS_RPC_INVENTORY.md`.
+- **Etapa 3 (guía prompts):** `FEATURE_DEVELOPMENT_GUIDE.md`.
+
 ---
 
 ## 1. Principios (acordados)

@@ -6,18 +6,20 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import withAuth from '@/hoc/withAuth'
 import { useAuth } from '@/context/AuthContextSupabase'
-import { Body, ButtonIcon, ButtonRs, Title } from 'rootsy-feparts'
-import { SectionHeader } from '@/components/layouts/SectionHeader'
-import { ArrowLeftIcon24 } from '@/components/atoms/icons/ArrowLeftIcon24'
+import { usePopPermissions } from '@/context/PopPermissionsContext'
+import { POP_PERMS } from '@/lib/popPermissionConstants'
+import { Body, ButtonRs, Title } from 'rootsy-feparts'
+import {
+  PopDarkShellLayout,
+  POP_SCREEN_DEFAULT_AVATAR
+} from '@/components/layouts/PopDarkShellLayout'
+import popShellStyles from '@/components/layouts/PopDarkShellLayout.module.css'
 import {
   getPopSettingsForEdit,
   updatePopSettings,
   type PopOutletSettingsDTO
 } from './actions'
 import styles from './page.module.css'
-
-const PLACEHOLDER_USER_IMG =
-  'https://files.lafm.com.co/assets/public/styles/img_node_706x392/public/2018-06/mia_6_0.jpg.webp?VersionId=5JmTFkYwubURMj1EkAsGiS8U26gBGb7z&itok=BoONFqiq'
 
 /** Misma ruta en Storage → misma URL pública; el navegador cachea. Versión en query fuerza recarga. */
 function storagePublicUrlWithCacheBust (publicUrl: string): string {
@@ -29,8 +31,21 @@ const Page = () => {
   const router = useRouter()
   const params = useParams()
   const { user } = useAuth()
+  const { permissionKeys, hasPermissionDef } = usePopPermissions()
   const supabase = createClientComponentClient()
   const popId = params?.pop as string | undefined
+
+  const canReadSettings = hasPermissionDef(POP_PERMS.SETTINGS_READ)
+  const canEdit = hasPermissionDef(POP_PERMS.SETTINGS_UPDATE)
+
+  useEffect(() => {
+    console.log('[settings] permisos en contexto', {
+      popId,
+      permissionKeys: [...permissionKeys],
+      settingsRead: hasPermissionDef(POP_PERMS.SETTINGS_READ),
+      settingsUpdate: hasPermissionDef(POP_PERMS.SETTINGS_UPDATE)
+    })
+  }, [popId, permissionKeys, hasPermissionDef])
 
   const [popData, setPopData] = useState<PopOutletSettingsDTO | null>(null)
   const [loading, setLoading] = useState(true)
@@ -89,12 +104,6 @@ const Page = () => {
         }
         setPopData(result.pop)
         applyDto(result.pop)
-        if (!result.pop.canUpdate) {
-          setBanner({
-            type: 'info',
-            text: 'Podés ver los datos del punto de venta. Para editarlos necesitás permiso de configuración (settings:update).'
-          })
-        }
       } catch {
         if (!cancelled) setError('Error inesperado al cargar datos')
       } finally {
@@ -107,10 +116,6 @@ const Page = () => {
     }
   }, [popId, router, applyDto])
 
-  const handleBackClick = () => {
-    if (popId) router.push(`/${popId}/menu`)
-  }
-
   const uploadPopAsset = async (
     file: File,
     objectBase: 'logo' | 'background' | 'invoice-logo'
@@ -119,7 +124,7 @@ const Page = () => {
       setBanner({ type: 'err', text: 'Falta el identificador del punto de venta.' })
       return
     }
-    if (!popData?.canUpdate) {
+    if (!canEdit) {
       setBanner({
         type: 'err',
         text: 'No tenés permiso para subir imágenes en este POP.'
@@ -193,7 +198,7 @@ const Page = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!popId || !popData?.canUpdate) return
+    if (!popId || !canEdit) return
     setSaving(true)
     setBanner(null)
     const res = await updatePopSettings(popId, {
@@ -224,50 +229,41 @@ const Page = () => {
     }
   }
 
-  if (loading) {
+  const busyUpload = uploadKey !== null
+
+  const userAvatarSrc =
+    user?.user_metadata?.avatar_url || POP_SCREEN_DEFAULT_AVATAR
+
+  if (!popId) {
     return (
-      <div className={styles.grid}>
-        <div style={{ padding: '40px', textAlign: 'center', zIndex: 1 }}>
+      <div style={{ padding: 40, color: '#fff' }}>
+        <Body size='md' color='white'>
+          ID de POP no encontrado
+        </Body>
+      </div>
+    )
+  }
+
+  return (
+    <PopDarkShellLayout
+      popId={popId}
+      sectionTitle='Configuración'
+      popName={popData?.name ?? ''}
+      userAvatarSrc={userAvatarSrc}
+    >
+      {loading ? (
+        <div className={popShellStyles.centeredMessage}>
           <Body size='md' color='white'>
             Cargando…
           </Body>
         </div>
-      </div>
-    )
-  }
-
-  if (error || !popData) {
-    return (
-      <div className={styles.grid}>
-        <div style={{ padding: '40px', textAlign: 'center', zIndex: 1 }}>
+      ) : error || !popData ? (
+        <div className={popShellStyles.centeredMessage}>
           <Body size='md' color='white'>
             {error || 'No se encontraron datos del POP'}
           </Body>
         </div>
-      </div>
-    )
-  }
-
-  const canEdit = popData.canUpdate
-  const busyUpload = uploadKey !== null
-
-  return (
-    <div className={styles.grid}>
-      <SectionHeader
-        sectionName='Settings'
-        popName={popData.name}
-        userImg={{
-          src: user?.user_metadata?.avatar_url || PLACEHOLDER_USER_IMG,
-          alt: 'Usuario'
-        }}
-        buttonsLeft={
-          <ButtonIcon
-            icon={<ArrowLeftIcon24 />}
-            onPress={handleBackClick}
-          />
-        }
-      />
-      <main className={styles.main}>
+      ) : (
         <div className={styles.inner}>
           <div style={{ marginBottom: 20 }}>
             <Title color='white'>Punto de venta</Title>
@@ -277,6 +273,16 @@ const Page = () => {
               </Body>
             </div>
           </div>
+
+          {popData && canReadSettings && !canEdit ? (
+            <div
+              className={`${styles.banner} ${styles.bannerInfo}`}
+              role='status'
+            >
+              Podés ver los datos del punto de venta. Para editarlos necesitás
+              permiso de configuración (settings:update).
+            </div>
+          ) : null}
 
           {banner ? (
             <div
@@ -593,8 +599,8 @@ const Page = () => {
             )}
           </form>
         </div>
-      </main>
-    </div>
+      )}
+    </PopDarkShellLayout>
   )
 }
 

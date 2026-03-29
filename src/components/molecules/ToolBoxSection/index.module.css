@@ -1,0 +1,34 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 64px;
+  background-color: var(--grayscale-600);
+  align-items: center;
+  padding: 0 16px;
+}
+
+.sectionName {
+  text-align: center;
+}
+
+.rightContent {
+  display: flex;
+  gap: 0 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.userContainer {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
+  background-color: var(--grayscale-600);
+  padding: 4px 4px 4px 12px;
+  border-radius: 51px;
+}
+
+.userContainer img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}

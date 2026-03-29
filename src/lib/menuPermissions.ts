@@ -1,43 +1,37 @@
+import { permissionKeysInclude } from '@/lib/popPermissionConstants'
+
+export function mapMenuLabelsToPermissionFlags (
+  permissionKeys: readonly string[],
+  menuItems: Array<{ label: string; link?: string }>
+): Record<string, boolean> {
+  const permissionsMap: Record<string, boolean> = {}
+  for (const item of menuItems) {
+    const permission = getMenuResourceAction(item.label, item.link)
+    if (!permission) {
+      permissionsMap[item.label] = true
+      continue
+    }
+    permissionsMap[item.label] = permissionKeysInclude(
+      permissionKeys,
+      permission.resource,
+      permission.action
+    )
+  }
+  return permissionsMap
+}
+
 export function getMenuResourceAction (
   menuLabel: string,
-  _menuLink?: string
+  menuLink?: string
 ): {
   resource: string
   action: string
 } | null {
-  const menuPermissionMap: Record<string, { resource: string; action: string }> =
-    {
-      Mesas: { resource: 'tables', action: 'view' },
-      Mostrador: { resource: 'counter', action: 'view' },
-      Vender: { resource: 'sales', action: 'create' },
-      Comprar: { resource: 'purchases', action: 'view' },
-      Fabricación: { resource: 'manufacturing', action: 'view' },
-      Inventario: { resource: 'inventory', action: 'view' },
-      Clientes: { resource: 'customers', action: 'view' },
-      Proveedores: { resource: 'suppliers', action: 'view' },
-      'Cuentas Corrientes': { resource: 'accounts_receivable', action: 'view' },
-      Promociones: { resource: 'promotions', action: 'view' },
-      Recetas: { resource: 'recipes', action: 'view' },
-      Pedidos: { resource: 'orders', action: 'view' },
-      Presupuestos: { resource: 'quotes', action: 'view' },
-      Resumen: { resource: 'summary', action: 'view' },
-      Estadísticas: { resource: 'statistics', action: 'view' },
-      Operaciones: { resource: 'operations', action: 'view' },
-      Movimientos: { resource: 'movements', action: 'view' },
-      Gastos: { resource: 'expenses', action: 'view' },
-      Facturas: { resource: 'invoices', action: 'view' },
-      Reportes: { resource: 'reports', action: 'view' },
-      Cheques: { resource: 'checks', action: 'view' },
-      'Órdenes de Compra': { resource: 'purchase_orders', action: 'view' },
-      Mensajes: { resource: 'messages', action: 'view' },
-      Alertas: { resource: 'alerts', action: 'view' },
-      'Formas de Pago': { resource: 'payment_methods', action: 'view' },
-      Cajas: { resource: 'cash_registers', action: 'view' },
-      Cuentas: { resource: 'accounts', action: 'view' },
-      RRHH: { resource: 'hr', action: 'view' },
-      Impresoras: { resource: 'printers', action: 'view' },
-      Ajustes: { resource: 'settings', action: 'read' }
-    }
-
-  return menuPermissionMap[menuLabel] || null
+  void menuLabel
+  if (!menuLink) return null
+  if (menuLink === 'sale') return { resource: 'sale', action: 'read' }
+  if (menuLink === 'settings') return { resource: 'settings', action: 'read' }
+  if (menuLink === 'hr') return { resource: 'hr', action: 'read' }
+  if (menuLink === 'articles') return { resource: 'article', action: 'read' }
+  return { resource: 'menu', action: 'read' }
 }

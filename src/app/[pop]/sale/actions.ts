@@ -1,8 +1,13 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import {
+  POP_PERMS,
+  permissionKeysInclude
+} from '@/lib/popPermissionConstants'
 import { validatePopAccess } from '@/lib/popHelpers'
+import { loadPopPermissionsSnapshot } from '@/lib/popPermissionsServer'
+import { createClient } from '@/utils/supabase/server'
+import { SALE_CATALOG_RLS_DENIED_MESSAGE } from '@/lib/saleCatalogMessages'
 
 export type SaleCategoryRow = {
   id: string
@@ -17,6 +22,22 @@ export type SaleArticleRow = {
   category: string
   category_id: string
   iva: number
+}
+
+function isLikelyRlsOrPermissionDenied (err: {
+  code?: string
+  message?: string
+}): boolean {
+  const c = String(err.code || '')
+  const m = (err.message || '').toLowerCase()
+  return (
+    c === '42501' ||
+    c === 'PGRST301' ||
+    m.includes('permission denied') ||
+    m.includes('row-level security') ||
+    m.includes('violates row-level') ||
+    m.includes('rls')
+  )
 }
 
 function mapArticleRow (row: Record<string, unknown>): SaleArticleRow {
@@ -35,6 +56,28 @@ function mapArticleRow (row: Record<string, unknown>): SaleArticleRow {
   }
 }
 
+async function assertSalesScreenPermission (popId: string): Promise<
+  | { ok: true }
+  | { ok: false; error: string; redirect: string }
+> {
+  const snap = await loadPopPermissionsSnapshot(popId)
+  if (
+    !permissionKeysInclude(
+      snap.keys,
+      POP_PERMS.SALE_READ.resource,
+      POP_PERMS.SALE_READ.action
+    )
+  ) {
+    return {
+      ok: false,
+      error:
+        'No tenés permiso para ver la pantalla de Ventas en este punto de venta.',
+      redirect: `/${popId}/menu`
+    }
+  }
+  return { ok: true }
+}
+
 export async function getSaleCategories (popId: string) {
   try {
     const access = await validatePopAccess(popId)
@@ -47,8 +90,29 @@ export async function getSaleCategories (popId: string) {
       }
     }
 
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const gate = await assertSalesScreenPermission(popId)
+    if (!gate.ok) {
+      return {
+        success: false,
+        error: gate.error,
+        redirect: gate.redirect,
+        categories: [] as SaleCategoryRow[],
+        source: 'none' as const
+      }
+    }
+
+    const supabase = await createClient()
+
+    const { data: popRow } = await supabase
+      .from('pops')
+      .select('name')
+      .eq('id', popId)
+      .maybeSingle()
+
+    const popName =
+      typeof popRow?.name === 'string' && popRow.name.trim()
+        ? popRow.name.trim()
+        : 'Punto de venta'
 
     const { data: rows, error } = await supabase
       .from('categories')
@@ -60,6 +124,15 @@ export async function getSaleCategories (popId: string) {
 
     if (error) {
       const msg = error.message || ''
+      if (isLikelyRlsOrPermissionDenied(error)) {
+        return {
+          success: false,
+          error: SALE_CATALOG_RLS_DENIED_MESSAGE,
+          categories: [] as SaleCategoryRow[],
+          source: 'none' as const,
+          popName
+        }
+      }
       const missing =
         msg.includes('does not exist') || msg.includes('schema cache')
       return {
@@ -68,7 +141,8 @@ export async function getSaleCategories (popId: string) {
         source: 'categories' as const,
         warning: missing
           ? 'No existe la tabla `categories` en Supabase. Ejecutá la migración correspondiente.'
-          : msg
+          : msg,
+        popName
       }
     }
 
@@ -83,7 +157,8 @@ export async function getSaleCategories (popId: string) {
       success: true,
       categories,
       source: 'categories' as const,
-      warning: null as string | null
+      warning: null as string | null,
+      popName
     }
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Error desconocido'
@@ -112,8 +187,18 @@ export async function getSaleProducts (
       }
     }
 
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
+    const gate = await assertSalesScreenPermission(popId)
+    if (!gate.ok) {
+      return {
+        success: false,
+        error: gate.error,
+        redirect: gate.redirect,
+        articles: [] as SaleArticleRow[],
+        count: 0
+      }
+    }
+
+    const supabase = await createClient()
 
     const search = (filters.search || '').trim().toLowerCase()
     const categoryId = (filters.categoryId || '').trim()
@@ -147,6 +232,14 @@ export async function getSaleProducts (
 
     if (error) {
       const msg = error.message || ''
+      if (isLikelyRlsOrPermissionDenied(error)) {
+        return {
+          success: false,
+          error: SALE_CATALOG_RLS_DENIED_MESSAGE,
+          articles: [] as SaleArticleRow[],
+          count: 0
+        }
+      }
       const missing =
         msg.includes('does not exist') || msg.includes('schema cache')
       return {

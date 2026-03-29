@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation'
 import useEmblaCarousel from 'embla-carousel-react'
 import withAuth from '@/hoc/withAuth'
 import { useAuth } from '@/context/AuthContextSupabase'
+import { usePopPermissions } from '@/context/PopPermissionsContext'
+import { mapMenuLabelsToPermissionFlags } from '@/lib/menuPermissions'
 import {
   Body,
   Button,
@@ -60,6 +62,7 @@ const Page = () => {
   const router = useRouter()
   const params = useParams()
   const { user, logOut } = useAuth()
+  const { permissionKeys } = usePopPermissions()
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'center', loop: true })
   const popId = params?.pop as string | undefined
   const [popData, setPopData] = useState<{
@@ -69,7 +72,6 @@ const Page = () => {
     address: string | null
     backgroundImageUrl?: string | null
   } | null>(null)
-  const [permissions, setPermissions] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -98,14 +100,13 @@ const Page = () => {
         }
 
         setPopData(result.pop!)
-        setPermissions(result.permissions || {})
         setTimeout(() => {
           setLoading(false)
         }, 0)
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(
           'Error inesperado al cargar datos: ' +
-          (err.message || 'Error desconocido')
+          (err instanceof Error ? err.message : 'Error desconocido')
         )
         setLoading(false)
       }
@@ -129,13 +130,18 @@ const Page = () => {
     router.push(`/${popId}/${link}`)
   }
 
+  const menuPermissionFlags = useMemo(() => {
+    const allMenuItems = MENU.flat()
+    return mapMenuLabelsToPermissionFlags(permissionKeys, allMenuItems)
+  }, [permissionKeys])
+
   const processedMenuItems = useMemo(() => {
-    if (!popData || Object.keys(permissions).length === 0) return []
+    if (!popData) return []
 
     return MENU.map((groups, groupIndex) => ({
       groupIndex,
       items: groups.map((item, itemIndex) => {
-        const hasPermission = permissions[item.label] ?? false
+        const hasPermission = menuPermissionFlags[item.label] ?? false
         const isDisabled = !hasPermission || !item.link
         return {
           ...item,
@@ -145,7 +151,7 @@ const Page = () => {
         }
       })
     }))
-  }, [popData, permissions])
+  }, [popData, menuPermissionFlags])
 
   if (loading) {
     return (

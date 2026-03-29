@@ -21,3 +21,17 @@ export async function requireAuthenticatedUser () {
     email: user.email
   }
 }
+
+export async function getAuthenticatedUserOrNull (): Promise<{
+  uid: string
+  email: string | undefined
+} | null> {
+  const cookieStore = await cookies()
+  const supabase = createServerActionClient({ cookies: () => cookieStore })
+  const {
+    data: { user },
+    error
+  } = await supabase.auth.getUser()
+  if (error || !user) return null
+  return { uid: user.id, email: user.email ?? undefined }
+}

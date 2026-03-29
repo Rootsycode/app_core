@@ -3,7 +3,21 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { requireAuthenticatedUser } from './authHelpers'
-import { getMenuResourceAction } from './menuPermissions'
+import {
+  getMenuResourceAction,
+  mapMenuLabelsToPermissionFlags
+} from './menuPermissions'
+import {
+  loadPopPermissionsSnapshot,
+  type PopPermissionsSnapshotJSON
+} from './popPermissionsServer'
+
+export function mapMenuLabelsToPermissions (
+  snapshot: PopPermissionsSnapshotJSON,
+  menuItems: Array<{ label: string; link?: string }>
+): Record<string, boolean> {
+  return mapMenuLabelsToPermissionFlags(snapshot.keys, menuItems)
+}
 
 export async function checkMenuPermission (
   popId: string,
@@ -42,46 +56,8 @@ export async function getMenuPermissions (
   menuItems: Array<{ label: string; link?: string }>
 ): Promise<Record<string, boolean>> {
   try {
-    const user = await requireAuthenticatedUser()
-    const cookieStore = await cookies()
-    const supabase = createServerActionClient({ cookies: () => cookieStore })
-
-    const { data: userPermissions, error: permissionsError } = await supabase.rpc(
-      'get_user_all_permissions',
-      {
-        pop_id: popId,
-        user_id: user.uid
-      }
-    )
-
-    if (permissionsError) {
-      return menuItems.reduce((acc, item) => {
-        acc[item.label] = false
-        return acc
-      }, {} as Record<string, boolean>)
-    }
-
-    const permissionsSet = new Set<string>()
-    if (userPermissions && Array.isArray(userPermissions)) {
-      userPermissions.forEach((perm: { resource: string; action: string }) => {
-        permissionsSet.add(`${perm.resource}:${perm.action}`)
-      })
-    }
-
-    const permissionsMap: Record<string, boolean> = {}
-
-    menuItems.forEach((item) => {
-      const permission = getMenuResourceAction(item.label, item.link)
-      if (!permission) {
-        permissionsMap[item.label] = true
-        return
-      }
-
-      const permissionKey = `${permission.resource}:${permission.action}`
-      permissionsMap[item.label] = permissionsSet.has(permissionKey)
-    })
-
-    return permissionsMap
+    const snapshot = await loadPopPermissionsSnapshot(popId)
+    return mapMenuLabelsToPermissions(snapshot, menuItems)
   } catch {
     return menuItems.reduce((acc, item) => {
       acc[item.label] = false

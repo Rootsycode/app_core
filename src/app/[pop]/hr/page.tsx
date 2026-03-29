@@ -5,9 +5,12 @@ import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
 import withAuth from '@/hoc/withAuth'
 import { useAuth } from '@/context/AuthContextSupabase'
-import { Body, ButtonIcon, ButtonRs, Title } from 'rootsy-feparts'
-import { SectionHeader } from '@/components/layouts/SectionHeader'
-import { ArrowLeftIcon24 } from '@/components/atoms/icons/ArrowLeftIcon24'
+import { Body, ButtonRs, Title } from 'rootsy-feparts'
+import {
+  PopDarkShellLayout,
+  POP_SCREEN_DEFAULT_AVATAR
+} from '@/components/layouts/PopDarkShellLayout'
+import popShellStyles from '@/components/layouts/PopDarkShellLayout.module.css'
 import {
   deactivatePopMember,
   deletePopRole,
@@ -22,9 +25,6 @@ import {
   type PopRoleRow
 } from './actions'
 import styles from './page.module.css'
-
-const PLACEHOLDER_USER_IMG =
-  'https://files.lafm.com.co/assets/public/styles/img_node_706x392/public/2018-06/mia_6_0.jpg.webp?VersionId=5JmTFkYwubURMj1EkAsGiS8U26gBGb7z&itok=BoONFqiq'
 
 function groupMembersByRole (members: MemberRow[]): [string, MemberRow[]][] {
   const m = new Map<string, MemberRow[]>()
@@ -268,47 +268,39 @@ const Page = () => {
     setBanner({ type: 'ok', text: 'Enlace copiado al portapapeles.' })
   }
 
-  if (loading) {
-    return (
-      <div className={styles.grid}>
-        <div style={{ padding: 40, textAlign: 'center', zIndex: 1 }}>
-          <Body size='md' color='white'>
-            Cargando…
-          </Body>
-        </div>
-      </div>
-    )
-  }
+  const userAvatarSrc =
+    user?.user_metadata?.avatar_url || POP_SCREEN_DEFAULT_AVATAR
 
-  if (error) {
+  if (!popId) {
     return (
-      <div className={styles.grid}>
-        <div style={{ padding: 40, textAlign: 'center', zIndex: 1 }}>
-          <Body size='md' color='white'>
-            {error}
-          </Body>
-        </div>
+      <div style={{ padding: 40, color: '#fff' }}>
+        <Body size='md' color='white'>
+          ID de POP no encontrado
+        </Body>
       </div>
     )
   }
 
   return (
-    <div className={styles.grid}>
-      <SectionHeader
-        sectionName='HR'
-        popName={popName}
-        userImg={{
-          src: user?.user_metadata?.avatar_url || PLACEHOLDER_USER_IMG,
-          alt: 'Usuario'
-        }}
-        buttonsLeft={
-          <ButtonIcon
-            icon={<ArrowLeftIcon24 />}
-            onPress={() => (popId ? router.push(`/${popId}/menu`) : router.push('/home'))}
-          />
-        }
-      />
-      <main className={styles.main}>
+    <PopDarkShellLayout
+      popId={popId}
+      sectionTitle='RRHH'
+      popName={popName}
+      userAvatarSrc={userAvatarSrc}
+    >
+      {loading ? (
+        <div className={popShellStyles.centeredMessage}>
+          <Body size='md' color='white'>
+            Cargando…
+          </Body>
+        </div>
+      ) : error ? (
+        <div className={popShellStyles.centeredMessage}>
+          <Body size='md' color='white'>
+            {error}
+          </Body>
+        </div>
+      ) : (
         <div className={styles.inner}>
           <div style={{ marginBottom: 20 }}>
             <Title color='white'>Recursos humanos</Title>
@@ -577,7 +569,7 @@ const Page = () => {
             </div>
           </div>
         </div>
-      </main>
+      )}
 
       {permModalRole ? (
         <div
@@ -657,7 +649,7 @@ const Page = () => {
           </div>
         </div>
       ) : null}
-    </div>
+    </PopDarkShellLayout>
   )
 }
 

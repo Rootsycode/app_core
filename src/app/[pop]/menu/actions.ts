@@ -1,9 +1,6 @@
 'use server'
 
 import { getPopById, validatePopAccess } from '@/lib/popHelpers'
-import { getMenuPermissions } from '@/lib/menuPermissionsServer'
-import { MENU } from '@/constant/Menu'
-import { POP_MENU_ROLLOUT_LINKS } from '@/constant/popMenuRollout'
 
 export async function getPopMenuData (popId: string) {
   try {
@@ -35,28 +32,9 @@ export async function getPopMenuData (popId: string) {
       }
     }
 
-    const allMenuItems = MENU.flat()
-    let permissions: Record<string, boolean> = {}
-
-    try {
-      permissions = await getMenuPermissions(popId, allMenuItems)
-    } catch {
-      permissions = allMenuItems.reduce((acc, item) => {
-        acc[item.label] = true
-        return acc
-      }, {} as Record<string, boolean>)
-    }
-
-    for (const item of allMenuItems) {
-      if (item.link && POP_MENU_ROLLOUT_LINKS.has(item.link)) {
-        permissions[item.label] = true
-      }
-    }
-
     return {
       success: true,
-      pop: popData.pop,
-      permissions
+      pop: popData.pop
     }
   } catch (error: unknown) {
     const message =
